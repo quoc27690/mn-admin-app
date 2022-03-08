@@ -5,17 +5,29 @@ import HomeStackScreen from "@stack/HomeStack";
 import SettingStackScreen from "@stack/SettingStack";
 import SignInStackScreen from "@stack/SignInStack";
 import React, { useEffect, useState } from "react";
+import * as SecureStore from "expo-secure-store";
+import { useDispatch } from "react-redux";
 
 const Tab = createBottomTabNavigator();
 
 function SrcApp() {
+	const { userToken } = useSelector((state) => state.user);
 	const [isLoading, setIsloading] = useState(true);
 
 	useEffect(() => {
-		setTimeout(() => {
-			setIsloading(false);
-		}, 3000);
+		getUserToken();
 	}, []);
+
+	const getUserToken = async () => {
+		let userToken;
+
+		try {
+			userToken = await SecureStore.getItemAsync("userToken");
+		} catch (e) {
+			// Restoring token failed
+		}
+		
+	};
 
 	if (isLoading) {
 		// We haven't finished checking for the token yet
@@ -24,7 +36,7 @@ function SrcApp() {
 
 	return (
 		<NavigationContainer>
-			{true ? (
+			{!userToken ? (
 				<SignInStackScreen />
 			) : (
 				<Tab.Navigator>

@@ -2,14 +2,14 @@ import {
 	decrement,
 	increment,
 	incrementByAmount,
-} from "@redux/features/authSlice";
+} from "@redux/features/userSlice";
 import * as React from "react";
 import { Text, View, Button } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 function HomeScreen({ navigation }) {
 	const dispatch = useDispatch();
-	const { value } = useSelector((state) => state.auth);
+	const { value } = useSelector((state) => state.user);
 
 	console.log("HomeScreen", value);
 

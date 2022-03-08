@@ -2,9 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   value: 0,
+  userToken: null
 };
 
-export const authSlice = createSlice({
+export const userSlice = createSlice({
   name: 'counter',
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
@@ -22,5 +23,5 @@ export const authSlice = createSlice({
   },
 });
 
-export const { increment, decrement, incrementByAmount } = authSlice.actions;
-export default authSlice.reducer;
+export const { increment, decrement, incrementByAmount } = userSlice.actions;
+export default userSlice.reducer;
