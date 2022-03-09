@@ -1,13 +1,32 @@
-import * as React from "react";
-import { Text, View, Button } from "react-native";
+import React from "react";
+import { ImageBackground, StyleSheet, View } from "react-native";
+import { Image } from "react-native-elements";
+import { PALETTE } from "@common/style";
+import { BarIndicator } from "react-native-indicators";
 
-function SplashScreen() {
+export default SplashScreen = (props) => {
 	return (
-		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-			<Text>SplashScreen</Text>
-			<Text>WELCOME</Text>
-		</View>
+		<ImageBackground
+			source={require("@images/logo-screen.png")}
+			resizeMode="cover"
+			style={styles.container}
+		>
+			<Image source={require("@images/main-logo.png")} style={styles.logo_Img} />
+			<View style={{ height: 100 }}>
+				<BarIndicator color={PALETTE.main} count={6} size={30} />
+			</View>
+		</ImageBackground>
 	);
-}
+};
 
-export default SplashScreen;
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+		alignItems: "center",
+	},
+	logo_Img: {
+		width: 170,
+		height: 150,
+		marginTop: 100,
+	},
+});

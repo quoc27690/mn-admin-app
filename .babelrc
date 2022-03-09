@@ -13,14 +13,19 @@
 					".android.tsx",
 					".jsx",
 					".js",
-					".json"
+					".json",
+					".png"
 				],
 				"alias": {
 					"@app": "./src/app",
+					"@api": "./src/api",
 					"@screens": "./src/screens",
 					"@stack": "./src/stack",
 					"@redux": "./src/redux",
 					"@common": "./src/common",
+					"@components": "./src/components",
+					"@images": "./assets/images",
+					"@fonts": "./assets/fonts"
 				}
 			}
 		]

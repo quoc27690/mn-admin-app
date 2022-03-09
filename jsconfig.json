@@ -3,10 +3,14 @@
 		"baseUrl": ".",
 		"paths": {
 			"@app/*": ["./src/app/*"],
+			"@api/*": ["./src/api/*"],
 			"@screens/*": ["./src/screens/*"],
 			"@redux/*": ["./src/redux/*"],
 			"@stack/*": ["./src/stack/*"],
-			"@common/*": ["./src/common/*"]
+			"@common/*": ["./src/common/*"],
+			"@components/*": ["./src/components/*"],
+			"@images/*": ["./assets/images/*"],
+			"@fonts/*": ["./assets/fonts/*"]
 		}
 	},
 	"exclude": ["node_modules"]
