@@ -1,12 +1,12 @@
 import * as React from "react";
 import { Text, View } from "react-native";
 
-function SignUpScreen({ navigation, route }) {
+function HSScreen({ navigation, route }) {
 	return (
 		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-			<Text>SignUpScreen</Text>
+			<Text>HSScreen</Text>
 		</View>
 	);
 }
 
-export default SignUpScreen;
+export default HSScreen;

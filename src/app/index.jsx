@@ -1,26 +1,27 @@
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { getToken, logOut } from "@common/identity";
+import DrawerNavigator from "@navigation/DrawerNavigator";
+import TabNavigator from "@navigation/TabNavigator";
 import { NavigationContainer } from "@react-navigation/native";
+import { updateToken } from "@redux/features/userSlice";
+import LogInScreen from "@screens/LogInScreen";
 import SplashScreen from "@screens/SplashScreen";
-import HomeStackScreen from "@stack/HomeStack";
-import SettingStackScreen from "@stack/SettingStack";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import * as SecureStore from "expo-secure-store";
-import SignInScreen from "@screens/SignInScreen";
-// import { useDispatch } from "react-redux";
 import * as Font from "expo-font";
-import { User } from "@common/const";
-
-const Tab = createBottomTabNavigator();
+import React, { useEffect, useState } from "react";
+import "react-native-gesture-handler";
+import { useDispatch, useSelector } from "react-redux";
 
 function SrcApp() {
+	const dispatch = useDispatch();
+	const { userToken, currentUser } = useSelector((state) => state.user);
+
 	const [isLoading, setIsloading] = useState(true);
 
 	useEffect(() => {
 		loadFont();
+		updateTokenToRedux();
 		setTimeout(() => {
 			setIsloading(false);
-	}, 2000);
+		}, 2000);
 	}, []);
 
 	const loadFont = async () => {
@@ -31,17 +32,20 @@ function SrcApp() {
 		});
 	};
 
+	const updateTokenToRedux = async () => {
+		const token = await getToken();
+		if (token) {
+			dispatch(updateToken(token));
+		}
+	};
+
 	if (isLoading) {
 		// We haven't finished checking for the token yet
 		return <SplashScreen />;
 	}
 
 	//Kiểm tra token còn thời hạn sử dụng không, nếu hết sẽ logout
-	const checkUser = async () => {
-		const currentUser = await SecureStore.getItemAsync(User.CurrentUser);
-		if (!currentUser || !currentUser.Id) {
-			return false;
-		}
+	const checkTime = async () => {
 		const expires = new Date(1000 * currentUser.exp);
 		const currentDate = new Date();
 		currentDate.setTime(currentDate.getTime() + 12 * 60 * 60 * 1000);
@@ -50,28 +54,21 @@ function SrcApp() {
 		);
 		const checkDate = currentDate >= expires;
 		if (subTotalHours <= 0 || checkDate === true) {
-			Logout();
+			logOut();
+			dispatch(updateToken(null));
 			return false;
 		}
-
 		return true;
-	};
-
-	// Logout xóa hết token trên máy & app -> chuyển về trang login
-	const Logout = async () => {
-		// await RemoveToken();
-		// dispatch(actions.AuthActions.UpdateToken(null));
 	};
 
 	return (
 		<NavigationContainer>
-			{!checkUser() ? (
-				<SignInScreen />
+			{userToken && checkTime() ? (
+				<>
+					<TabNavigator />
+				</>
 			) : (
-				<Tab.Navigator>
-					<Tab.Screen name="HomeTab" component={HomeStackScreen} />
-					<Tab.Screen name="SettingTab" component={SettingStackScreen} />
-				</Tab.Navigator>
+				<LogInScreen />
 			)}
 		</NavigationContainer>
 	);

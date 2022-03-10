@@ -6,6 +6,7 @@ const STATUSBAR_HEIGHT = Platform.OS === "ios" ? 34 : StatusBarManager.HEIGHT;
 const PALETTE = {
 	main: "#2175EF",
 	white: "#fff",
+	black: "#000",
 	gray: {
 		GAINSBORO: "#DCDCDC",
 		DIMGRAY: "#696969",

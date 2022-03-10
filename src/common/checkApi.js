@@ -1,7 +1,7 @@
 import Toast from "react-native-simple-toast";
 import { Res } from "./const";
 
-export const checkAPI = {
+export const checkApi = {
     check: (resp, showToast = true, showError = true) => {
         if (resp === Res.ErrorCode) {
             showError && Toast.show(resp.Message || "Thao tác thất bại");
@@ -16,4 +16,4 @@ export const checkAPI = {
         return true;
     },
 };
-export default checkAPI;
+export default checkApi;

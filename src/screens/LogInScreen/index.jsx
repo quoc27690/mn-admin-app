@@ -1,24 +1,32 @@
+import { UserAPI } from "@api/system";
+import checkApi from "@common/checkApi";
+import { AppCode } from "@common/const";
+import {
+	deleteSaveUser,
+	getSaveUser,
+	logIn,
+	setSaveUser,
+} from "@common/identity";
 import { OPTION_STACK, PALETTE } from "@common/style";
 import {
+	SVGHidePassword,
 	SVGLoginPassword,
 	SVGLoginUser,
-	SVGHidePassword,
 	SVGShowPassword,
 } from "@components/SVG";
-import React, { useRef, useState, useEffect } from "react";
+import { updateToken } from "@redux/features/userSlice";
+import React, { useEffect, useRef, useState } from "react";
 import { Image, ImageBackground, StyleSheet, View } from "react-native";
 import { Button, CheckBox, Input } from "react-native-elements";
-import * as SecureStore from "expo-secure-store";
-import { AppCode, User } from "@common/const";
-import jwt_decode from "jwt-decode";
-import { UserAPI } from "@api/system";
+import { useDispatch } from "react-redux";
 
 const clearValidation = {
 	errorUsername: null,
 	errorPassword: null,
 };
 
-export default SignInScreen = (props) => {
+export default LogInScreen = (props) => {
+	const dispatch = useDispatch();
 	const ref_passwords = useRef();
 
 	const [isLoading, setIsLoading] = useState(false);
@@ -46,9 +54,8 @@ export default SignInScreen = (props) => {
 
 	useEffect(() => {
 		(async () => {
-			const res = await SecureStore.getItemAsync(User.SaveUser);
-			if (res) {
-				const saveUser = JSON.parse(res);
+			const saveUser = await getSaveUser();
+			if (saveUser) {
 				setUsername(saveUser.username);
 				setPassword(saveUser.password);
 				setIsSavePassword(true);
@@ -71,24 +78,18 @@ export default SignInScreen = (props) => {
 				password: password,
 				appCode: AppCode,
 			};
-			let res = await UserAPI.SignIn(params);
-			if (CheckAPI.check(res, true)) {
-				await SecureStore.setItemAsync(User.UserToKen, res.Item.Token);
-				await SecureStore.setItemAsync(
-					User.CurrentUser,
-					JSON.stringify(jwt_decode(res.Item.Token))
-				);
+			let res = await UserAPI.LogIn(params);
+			if (checkApi.check(res, true)) {
+				await logIn(res.Item.Token);
+				dispatch(updateToken(res.Item.Token));
 				if (isSavePassword) {
 					const saveUser = {
 						username: username,
 						password: password,
 					};
-					await SecureStore.setItemAsync(
-						User.SaveUser,
-						JSON.stringify(saveUser)
-					);
+					await setSaveUser(saveUser);
 				} else {
-					await SecureStore.deleteItemAsync(JSON.stringify(User.SaveUser));
+					await deleteSaveUser();
 				}
 			}
 			setIsLoading(false);
@@ -109,17 +110,28 @@ export default SignInScreen = (props) => {
 		<ImageBackground
 			source={require("@images/login-background.png")}
 			resizeMode="cover"
-			style={styles.imageBackground}
+			style={{ flex: 1 }}
 		>
-			<View style={styles.logo}>
+			<View
+				style={{
+					alignItems: "center",
+					justifyContent: "center",
+					marginTop: 50,
+				}}
+			>
 				<Image
 					source={require("@images/login-logo.png")}
 					resizeMode="contain"
-					style={styles.imageLogo}
+					style={{ height: 73 }}
 				/>
 			</View>
-			<View style={styles.content}>
-				<View style={styles.inputContainer}>
+			<View
+				style={{
+					marginTop: 50,
+					marginHorizontal: OPTION_STACK.spacingHorizontal,
+				}}
+			>
+				<>
 					<View style={styles.inputGroup}>
 						<View style={styles.icon}>
 							<SVGLoginUser />
@@ -181,17 +193,26 @@ export default SignInScreen = (props) => {
 							/>
 						</View>
 					</View>
-				</View>
-				<View style={styles.savePasswordContainer}>
+				</>
+				<View
+					style={{ display: "flex", alignItems: "flex-end", marginRight: -10 }}
+				>
 					<CheckBox
 						title="Lưu mật khẩu"
 						checked={isSavePassword}
 						onPress={() => setIsSavePassword(!isSavePassword)}
-						containerStyle={styles.containerStyleCheckBox}
-						textStyle={styles.textStyleCheckBox}
+						containerStyle={{
+							borderWidth: 0,
+							backgroundColor: "transparent",
+							paddingHorizontal: 0,
+							paddingVertical: 0,
+							marginHorizontal: 0,
+							marginVertical: 0,
+						}}
+						textStyle={{ marginRight: 0, marginLeft: 0 }}
 					/>
 				</View>
-				<View style={styles.buttonContainer}>
+				<View style={{ marginTop: 25 }}>
 					<Button
 						title="Đăng nhập"
 						onPress={login}
@@ -206,22 +227,6 @@ export default SignInScreen = (props) => {
 };
 
 const styles = StyleSheet.create({
-	imageBackground: {
-		flex: 1,
-	},
-	logo: {
-		alignItems: "center",
-		justifyContent: "center",
-		marginTop: 50,
-	},
-	imageLogo: {
-		height: 73,
-	},
-	content: {
-		marginTop: 50,
-		marginHorizontal: OPTION_STACK.spacingHorizontal,
-	},
-	inputContainer: {},
 	inputGroup: {
 		flexDirection: "row",
 	},
@@ -245,25 +250,5 @@ const styles = StyleSheet.create({
 	},
 	inputStyleInput: {
 		fontSize: 12,
-	},
-	savePasswordContainer: {
-		display: "flex",
-		alignItems: "flex-end",
-		marginRight: -10,
-	},
-	containerStyleCheckBox: {
-		borderWidth: 0,
-		backgroundColor: "transparent",
-		paddingHorizontal: 0,
-		paddingVertical: 0,
-		marginHorizontal: 0,
-		marginVertical: 0,
-	},
-	textStyleCheckBox: {
-		marginRight: 0,
-		marginLeft: 0,
-	},
-	buttonContainer: {
-		marginTop: 25,
 	},
 });
