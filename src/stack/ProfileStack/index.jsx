@@ -2,14 +2,18 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 import ProfileScreen from "@screens/ProfileScreen";
 import DetailScreen from "@screens/DetailScreen";
-import { Button } from "react-native-elements";
 import { AntDesign } from "@expo/vector-icons";
+import InfoScreen from "./InfoScreen";
+import PassScreen from "./PassScreen";
 
 const SettingStack = createNativeStackNavigator();
 
-function SettingStackScreen({ navigation }) {
+function ProfileStack({ navigation }) {
 	return (
-		<SettingStack.Navigator initialRouteName="Profile">
+		<SettingStack.Navigator
+			initialRouteName="Profile"
+			screenOptions={{ headerShown: false }}
+		>
 			<SettingStack.Screen
 				name="Profile"
 				component={ProfileScreen}
@@ -28,6 +32,8 @@ function SettingStackScreen({ navigation }) {
 					),
 				}}
 			/>
+			<SettingStack.Screen name="Info" component={InfoScreen} />
+			<SettingStack.Screen name="Pass" component={PassScreen} />
 			<SettingStack.Screen
 				name="Detail"
 				component={DetailScreen}
@@ -40,7 +46,7 @@ function SettingStackScreen({ navigation }) {
 							color="black"
 							style={{ marginRight: 16 }}
 							onPress={() => {
-								navigation.navigate('Profile');
+								navigation.navigate("Profile");
 							}}
 						/>
 					),
@@ -50,4 +56,4 @@ function SettingStackScreen({ navigation }) {
 	);
 }
 
-export default SettingStackScreen;
+export default ProfileStack;

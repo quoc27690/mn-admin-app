@@ -9,6 +9,7 @@ import * as Font from "expo-font";
 import React, { useEffect, useState } from "react";
 import "react-native-gesture-handler";
 import { useDispatch, useSelector } from "react-redux";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 function SrcApp() {
 	const dispatch = useDispatch();
@@ -62,15 +63,17 @@ function SrcApp() {
 	};
 
 	return (
-		<NavigationContainer>
-			{userToken && checkTime() ? (
-				<>
-					<TabNavigator />
-				</>
-			) : (
-				<LogInScreen />
-			)}
-		</NavigationContainer>
+		<SafeAreaProvider>
+			<NavigationContainer>
+				{userToken && checkTime() ? (
+					<>
+						<DrawerNavigator />
+					</>
+				) : (
+					<LogInScreen />
+				)}
+			</NavigationContainer>
+		</SafeAreaProvider>
 	);
 }
 

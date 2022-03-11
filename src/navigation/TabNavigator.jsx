@@ -1,19 +1,19 @@
-import React from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { PALETTE } from "@common/style";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "@screens/HomeScreen";
 import NotificationScreen from "@screens/NotificationScreen";
-import ProfileScreen from "@screens/ProfileScreen";
+import ProfileStack from "@stack/ProfileStack";
+import React from "react";
 
 const Tab = createBottomTabNavigator();
 
-const TabNavigator = () => {
+const TabNavigator = ({ navigation }) => {
 	return (
 		<Tab.Navigator
 			screenOptions={({ route }) => ({
 				tabBarIcon: ({ focused, color, size }) => {
-					if (route.name === "Home") {
+					if (route.name === "Trang chủ") {
 						return (
 							<Ionicons
 								name="home"
@@ -41,11 +41,16 @@ const TabNavigator = () => {
 				},
 				tabBarInactiveTintColor: PALETTE.gray.DIMGRAY,
 				tabBarActiveTintColor: PALETTE.main,
+				headerShown: false,
 			})}
 		>
-			<Tab.Screen name="Home" component={HomeScreen} />
-			<Tab.Screen name="Notification" component={NotificationScreen} />
-			<Tab.Screen name="Profile" component={ProfileScreen} />
+			<Tab.Screen name="Trang chủ" component={HomeScreen} />
+			<Tab.Screen
+				name="Thông báo"
+				component={NotificationScreen}
+				options={{ tabBarBadge: 3 }}
+			/>
+			<Tab.Screen name="Tài khoản" component={ProfileStack} />
 		</Tab.Navigator>
 	);
 };
