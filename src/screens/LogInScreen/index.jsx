@@ -1,4 +1,4 @@
-import { UserAPI } from "@api/system";
+import { userApi } from "@api/system";
 import checkApi from "@common/checkApi";
 import { AppCode } from "@common/const";
 import {
@@ -78,7 +78,7 @@ export default LogInScreen = (props) => {
 				password: password,
 				appCode: AppCode,
 			};
-			let res = await UserAPI.LogIn(params);
+			let res = await userApi.LogIn(params);
 			if (checkApi.check(res, true)) {
 				await logIn(res.Item.Token);
 				dispatch(updateToken(res.Item.Token));

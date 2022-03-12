@@ -10,13 +10,13 @@ const list = [
 	{
 		title: "Thông tin tài khoản",
 		icon: <SVGThongTinTaiKhoan width={40} height={40} />,
-		navigation: "Info",
+		navigation: "InfoScreen",
 		description: "Thông tin cá nhân, đăng xuất",
 	},
 	{
 		title: "Đổi mật khẩu",
 		icon: <SVGDoiMatKhau width={40} height={40} />,
-		navigation: "Pass",
+		navigation: "PassScreen",
 		description: "Thay đổi mật khẩu đăng nhập",
 	},
 ];

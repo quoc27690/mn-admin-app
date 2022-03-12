@@ -1,3 +1,3 @@
-import UserAPI from "./User.API";
+import userApi from "./user.API";
 
-export { UserAPI };
+export { userApi };

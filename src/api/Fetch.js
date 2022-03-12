@@ -4,7 +4,7 @@ import * as SecureStore from "expo-secure-store";
 
 const getBearerToken = async () => {
 	let authorization = {};
-	const token = SecureStore.getItemAsync(User.UserToKen);
+	const token = await SecureStore.getItemAsync(User.UserToKen);
 	if (token) {
 		authorization = {
 			Authorization: "Bearer " + token,

@@ -1,17 +1,13 @@
-import React, { useRef, useState } from "react";
-import {
-	Dimensions,
-	Image,
-	ScrollView,
-	StyleSheet,
-	Text,
-	View,
-} from "react-native";
-import { Button, Input } from "react-native-elements";
-import { SVGHidePassword, SVGShowPassword } from "@components/SVG";
 import { OPTION_STACK, PALETTE } from "@common/style";
-import { useSelector } from "react-redux";
 import ImageBg from "@components/ImageBg";
+import { SVGHidePassword, SVGShowPassword } from "@components/SVG";
+import React, { useRef, useState } from "react";
+import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Button, Input } from "react-native-elements";
+import { useSelector } from "react-redux";
+import { password } from "@common/validateForm";
+import { userApi } from "@api/system";
+import checkApi from "@common/checkApi";
 
 export default PassScreen = (props) => {
 	const ref_passwords = useRef();
@@ -41,13 +37,13 @@ export default PassScreen = (props) => {
 			errorMessage.errorOldPass = "Mật khẩu cũ không thể để trống!";
 			isValid = false;
 		} else {
-			errorMessage.errorOldPass = passwordComplex(oldPass) || null;
+			errorMessage.errorOldPass = null;
 		}
 		if (newPass?.trim()?.length == 0 || newPass == null) {
 			errorMessage.errorNewPass = "Mật khẩu mới không thể để trống!";
 			isValid = false;
 		} else {
-			errorMessage.errorNewPass = passwordComplex(newPass) || null;
+			errorMessage.errorNewPass = password(newPass) || null;
 		}
 		if (reNewPass?.trim()?.length == 0 || reNewPass == null) {
 			errorMessage.errorReNewPass = "Mật khẩu xác nhận không thể để trống!";
@@ -88,12 +84,9 @@ export default PassScreen = (props) => {
 				newPassword: newPass,
 				reNewPassword: reNewPass,
 			};
-			const res = await UserAPI.changePassword(params);
-			console.log(111, { res });
-			if (CheckAPI.check(res, true)) {
+			const res = await userApi.ChangePassword(params);
+			if (checkApi.check(res)) {
 				props.navigation.goBack();
-			} else {
-				Toast.show(res.Message);
 			}
 		}
 		setIsLoading(false);

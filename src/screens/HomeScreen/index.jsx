@@ -5,14 +5,18 @@ import { Button, Text, View } from "react-native";
 import { useDispatch } from "react-redux";
 
 function HomeScreen({ navigation }) {
+	React.useEffect(() => {
+		const unsubscribe = navigation.addListener("focus", () => {
+			const navigationDrawer = navigation.getParent();
+			navigationDrawer.setOptions({ headerShown: true });
+		});
+		return unsubscribe;
+	}, [navigation]);
+
 	const dispatch = useDispatch();
 	return (
 		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
 			<Text>HomeScreen</Text>
-			{/* <Button
-				title="Go to Detail"
-				onPress={() => navigation.navigate("Detail")}
-			/> */}
 			<Button
 				title="Log out"
 				onPress={() => {

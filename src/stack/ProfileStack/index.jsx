@@ -1,55 +1,61 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import * as React from "react";
-import ProfileScreen from "@screens/ProfileScreen";
-import DetailScreen from "@screens/DetailScreen";
 import { AntDesign } from "@expo/vector-icons";
-import InfoScreen from "./InfoScreen";
-import PassScreen from "./PassScreen";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import ProfileScreen from "@screens/ProfileScreen";
+import * as React from "react";
+import InfoScreen from "@screens/ProfileScreen/InfoScreen";
+import PassScreen from "@screens/ProfileScreen/PassScreen";
+import BackButton from "@components/BackButton";
 
 const SettingStack = createNativeStackNavigator();
 
 function ProfileStack({ navigation }) {
+	React.useEffect(() => {
+		const unsubscribe = navigation.addListener("focus", () => {
+			const navigationDrawer = navigation.getParent();
+			navigationDrawer.setOptions({ headerShown: false });
+		});
+		return unsubscribe;
+	}, [navigation]);
+
 	return (
-		<SettingStack.Navigator
-			initialRouteName="Profile"
-			screenOptions={{ headerShown: false }}
-		>
+		<SettingStack.Navigator initialRouteName="Profile">
 			<SettingStack.Screen
-				name="Profile"
+				name="ProfileScreen"
 				component={ProfileScreen}
 				options={{
-					headerLeft: (props) => (
-						<AntDesign
-							{...props}
-							name="back"
-							size={24}
-							color="black"
-							style={{ marginRight: 16 }}
-							onPress={() => {
-								navigation.goBack();
-							}}
-						/>
-					),
+					headerShown: false,
 				}}
 			/>
-			<SettingStack.Screen name="Info" component={InfoScreen} />
-			<SettingStack.Screen name="Pass" component={PassScreen} />
 			<SettingStack.Screen
-				name="Detail"
-				component={DetailScreen}
+				name="InfoScreen"
+				component={InfoScreen}
 				options={{
+					title: "Thông tin tài khoản",
 					headerLeft: (props) => (
-						<AntDesign
+						<BackButton
 							{...props}
-							name="back"
-							size={24}
-							color="black"
-							style={{ marginRight: 16 }}
 							onPress={() => {
-								navigation.navigate("Profile");
+								navigation.navigate("ProfileScreen");
 							}}
 						/>
 					),
+					headerShown: true,
+				}}
+			/>
+			<SettingStack.Screen
+				name="PassScreen"
+				component={PassScreen}
+				options={{
+					title: "Đổi mật khẩu",
+					headerLeft: (props) => (
+						<BackButton
+							{...props}
+							onPress={() => {
+								navigation.navigate("ProfileScreen");
+							}}
+						/>
+					),
+					headerShown: true,
 				}}
 			/>
 		</SettingStack.Navigator>
