@@ -1,5 +1,26 @@
 import * as SecureStore from "expo-secure-store";
 import { User } from "@common/const";
+import { useDispatch } from "react-redux";
+import { updateToken } from "@redux/features/userSlice";
+
+export const useIdentity = () => {
+	const dispatch = useDispatch();
+
+	const logOut = async () => {
+		await deleteToken();
+		dispatch(updateToken(null));
+	};
+
+	const logIn = async (token) => {
+		await setToken(token);
+		dispatch(updateToken(token));
+	};
+
+	return {
+		logOut,
+		logIn,
+	};
+};
 
 export const getToken = async () => {
 	const token = await SecureStore.getItemAsync(User.UserToKen);
@@ -15,11 +36,11 @@ export const setSaveUser = async (data) => {
 	await SecureStore.setItemAsync(User.SaveUser, JSON.stringify(data));
 };
 
-export const logIn = async (token) => {
+export const setToken = async (token) => {
 	await SecureStore.setItemAsync(User.UserToKen, token);
 };
 
-export const logOut = async () => {
+export const deleteToken = async () => {
 	await SecureStore.deleteItemAsync(User.UserToKen);
 };
 

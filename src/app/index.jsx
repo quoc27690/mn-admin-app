@@ -1,6 +1,5 @@
-import { getToken, logOut } from "@common/identity";
+import { getToken, useIdentity } from "@common/identity";
 import DrawerNavigator from "@navigation/DrawerNavigator";
-import TabNavigator from "@navigation/TabNavigator";
 import { NavigationContainer } from "@react-navigation/native";
 import { updateToken } from "@redux/features/userSlice";
 import LogInScreen from "@screens/LogInScreen";
@@ -8,10 +7,11 @@ import SplashScreen from "@screens/SplashScreen";
 import * as Font from "expo-font";
 import React, { useEffect, useState } from "react";
 import "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 function SrcApp() {
+	const { logOut } = useIdentity();
 	const dispatch = useDispatch();
 	const { userToken, currentUser } = useSelector((state) => state.user);
 
@@ -55,8 +55,7 @@ function SrcApp() {
 		);
 		const checkDate = currentDate >= expires;
 		if (subTotalHours <= 0 || checkDate === true) {
-			logOut();
-			dispatch(updateToken(null));
+			await logOut();
 			return false;
 		}
 		return true;

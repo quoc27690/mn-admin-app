@@ -1,24 +1,19 @@
-import { userApi } from "@api/system";
+import { UserApi } from "@api/system";
 import checkApi from "@common/checkApi";
 import { AppCode } from "@common/const";
 import {
 	deleteSaveUser,
 	getSaveUser,
-	logIn,
 	setSaveUser,
+	useIdentity,
 } from "@common/identity";
-import { OPTION_STACK, PALETTE } from "@common/style";
-import {
-	SVGHidePassword,
-	SVGLoginPassword,
-	SVGLoginUser,
-	SVGShowPassword,
-} from "@components/SVG";
-import { updateToken } from "@redux/features/userSlice";
+import { OPTION_STACK } from "@common/style";
+import { requiredText } from "@common/validateForm";
+import CustomInputGroup from "@components/CustomInputGroup";
+import { SVGLoginPassword, SVGLoginUser } from "@components/SVG";
 import React, { useEffect, useRef, useState } from "react";
-import { Image, ImageBackground, StyleSheet, View } from "react-native";
-import { Button, CheckBox, Input } from "react-native-elements";
-import { useDispatch } from "react-redux";
+import { Image, ImageBackground, View } from "react-native";
+import { Button, CheckBox } from "react-native-elements";
 
 const clearValidation = {
 	errorUsername: null,
@@ -26,26 +21,25 @@ const clearValidation = {
 };
 
 export default LogInScreen = (props) => {
-	const dispatch = useDispatch();
+	const { logIn } = useIdentity();
 	const ref_passwords = useRef();
 
 	const [isLoading, setIsLoading] = useState(false);
-	const [hidePass, setHidePass] = useState(true);
+	const [isHidePass, setIsHidePass] = useState(true);
 	const [username, setUsername] = useState(null);
 	const [password, setPassword] = useState(null);
 	const [validate, setValidate] = useState(clearValidation);
 	const [isSavePassword, setIsSavePassword] = useState(false);
-	const [isDisableHidePass, setIsDisableHidePass] = useState(false);
 
 	const checkValidate = () => {
 		let isValid = true;
 		const errorMessage = { ...validate };
-		if (username?.trim()?.length == 0 || username == null) {
-			errorMessage.errorUsername = "Tài khoản đăng nhập không thể để trống!";
+		if (requiredText(username)) {
+			errorMessage.errorUsername = requiredText(username);
 			isValid = false;
 		}
-		if (password?.trim()?.length == 0 || password == null) {
-			errorMessage.errorPassword = "Mật khẩu không thể để trống!";
+		if (requiredText(password)) {
+			errorMessage.errorPassword = requiredText(password);
 			isValid = false;
 		}
 		!isValid && setValidate({ ...errorMessage });
@@ -59,16 +53,9 @@ export default LogInScreen = (props) => {
 				setUsername(saveUser.username);
 				setPassword(saveUser.password);
 				setIsSavePassword(true);
-				setIsDisableHidePass(true);
 			}
 		})();
 	}, []);
-
-	useEffect(() => {
-		if (!password) {
-			setIsDisableHidePass(false);
-		}
-	}, [password]);
 
 	const login = async () => {
 		if (checkValidate()) {
@@ -78,10 +65,9 @@ export default LogInScreen = (props) => {
 				password: password,
 				appCode: AppCode,
 			};
-			let res = await userApi.LogIn(params);
+			let res = await UserApi.LogIn(params);
 			if (checkApi.check(res, true)) {
 				await logIn(res.Item.Token);
-				dispatch(updateToken(res.Item.Token));
 				if (isSavePassword) {
 					const saveUser = {
 						username: username,
@@ -131,69 +117,26 @@ export default LogInScreen = (props) => {
 					marginHorizontal: OPTION_STACK.spacingHorizontal,
 				}}
 			>
-				<>
-					<View style={styles.inputGroup}>
-						<View style={styles.icon}>
-							<SVGLoginUser />
-						</View>
-						<View style={styles.input}>
-							<Input
-								placeholder="Tên đăng nhập"
-								placeholderTextColor={PALETTE.gray.DIMGRAY}
-								onChangeText={handleUsername}
-								errorMessage={validate.errorUsername}
-								onSubmitEditing={() => {
-									ref_passwords.current.focus();
-								}}
-								returnKeyType="next"
-								blurOnSubmit={false}
-								containerStyle={styles.containerStyleInput}
-								inputContainerStyle={styles.inputContainerStyleInput}
-								inputStyle={styles.inputStyleInput}
-								value={username}
-							/>
-						</View>
-					</View>
-					<View style={styles.inputGroup}>
-						<View style={styles.icon}>
-							<SVGLoginPassword />
-						</View>
-						<View style={styles.input}>
-							<Input
-								secureTextEntry={hidePass}
-								placeholder="Mật khẩu"
-								placeholderTextColor={PALETTE.gray.DIMGRAY}
-								onChangeText={handlePassword}
-								onSubmitEditing={login}
-								ref={ref_passwords}
-								errorMessage={validate.errorPassword}
-								rightIcon={
-									!isDisableHidePass && (
-										<View>
-											{hidePass ? (
-												<SVGHidePassword
-													width={16}
-													height={16}
-													onPress={() => setHidePass(!hidePass)}
-												/>
-											) : (
-												<SVGShowPassword
-													width={16}
-													height={16}
-													onPress={() => setHidePass(!hidePass)}
-												/>
-											)}
-										</View>
-									)
-								}
-								containerStyle={styles.containerStyleInput}
-								inputContainerStyle={styles.inputContainerStyleInput}
-								inputStyle={styles.inputStyleInput}
-								value={password}
-							/>
-						</View>
-					</View>
-				</>
+				<CustomInputGroup
+					iconComponent={<SVGLoginUser />}
+					value={username}
+					title="Tên đăng nhập"
+					errorValue={validate.errorUsername}
+					refNextInput={ref_passwords}
+					handleValue={handleUsername}
+				/>
+				<CustomInputGroup
+					iconComponent={<SVGLoginPassword />}
+					value={password}
+					isPassInput={true}
+					isHide={isHidePass}
+					title="Mật khẩu"
+					errorValue={validate.errorPassword}
+					refInput={ref_passwords}
+					setIsHideValue={setIsHidePass}
+					handleValue={handlePassword}
+					onSubmit={login}
+				/>
 				<View
 					style={{ display: "flex", alignItems: "flex-end", marginRight: -10 }}
 				>
@@ -225,30 +168,3 @@ export default LogInScreen = (props) => {
 		</ImageBackground>
 	);
 };
-
-const styles = StyleSheet.create({
-	inputGroup: {
-		flexDirection: "row",
-	},
-	icon: {
-		marginTop: 13,
-	},
-	input: {
-		flex: 1,
-		marginLeft: 19,
-	},
-	containerStyleInput: {
-		paddingHorizontal: 0,
-	},
-	inputContainerStyleInput: {
-		borderRadius: 4,
-		borderColor: PALETTE.gray.GAINSBORO,
-		borderWidth: 1,
-		height: 47,
-		paddingLeft: 16,
-		paddingRight: 16,
-	},
-	inputStyleInput: {
-		fontSize: 12,
-	},
-});

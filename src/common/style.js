@@ -28,5 +28,20 @@ const OPTION_STACK = {
 			textTransform: "uppercase",
 		},
 	},
+	buttonClose: {
+		container: {
+			height: 50,
+			borderRadius: 5,
+			borderWidth: 1,
+			borderColor: PALETTE.main,
+			backgroundColor: PALETTE.white,
+		},
+		text: {
+			fontFamily: "BeVietnamPro-600",
+			fontSize: 16,
+			color: PALETTE.main,
+			textTransform: "uppercase",
+		},
+	},
 };
 export { OPTION_STACK, STATUSBAR_HEIGHT, PALETTE };

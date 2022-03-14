@@ -1,13 +1,18 @@
-import { OPTION_STACK, PALETTE } from "@common/style";
-import ImageBg from "@components/ImageBg";
-import { SVGHidePassword, SVGShowPassword } from "@components/SVG";
-import React, { useRef, useState } from "react";
-import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Button, Input } from "react-native-elements";
-import { useSelector } from "react-redux";
-import { password } from "@common/validateForm";
-import { userApi } from "@api/system";
+import { UserApi } from "@api/system";
 import checkApi from "@common/checkApi";
+import { OPTION_STACK, PALETTE } from "@common/style";
+import {
+	confirmPassword,
+	requiredPassword,
+	requiredText,
+	checkPassword,
+} from "@common/validateForm";
+import CustomInput from "@components/CustomInput";
+import ImageBg from "@components/ImageBg";
+import React, { useRef, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Button } from "react-native-elements";
+import { useSelector } from "react-redux";
 
 export default PassScreen = (props) => {
 	const ref_passwords = useRef();
@@ -33,30 +38,27 @@ export default PassScreen = (props) => {
 		let isValid = true;
 		const errorMessage = { ...validate };
 
-		if (oldPass?.trim()?.length == 0 || oldPass == null) {
-			errorMessage.errorOldPass = "Mật khẩu cũ không thể để trống!";
-			isValid = false;
-		} else {
-			errorMessage.errorOldPass = null;
-		}
-		if (newPass?.trim()?.length == 0 || newPass == null) {
-			errorMessage.errorNewPass = "Mật khẩu mới không thể để trống!";
-			isValid = false;
-		} else {
-			errorMessage.errorNewPass = password(newPass) || null;
-		}
-		if (reNewPass?.trim()?.length == 0 || reNewPass == null) {
-			errorMessage.errorReNewPass = "Mật khẩu xác nhận không thể để trống!";
+		if (requiredText(oldPass)) {
+			errorMessage.errorOldPass = requiredText(old);
 			isValid = false;
 		}
-		if (oldPass?.trim() == newPass?.trim() && oldPass?.trim()?.length != 0) {
-			errorMessage.errorNewPass =
-				"Mật khẩu mới không được trùng với mật khẩu cũ!";
+		if (requiredText(newPass)) {
+			errorMessage.errorNewPass = requiredText(newPass);
+			isValid = false;
+		} else if (requiredPassword(newPass)) {
+			errorMessage.errorNewPass = requiredPassword(newPass);
 			isValid = false;
 		}
-		if (reNewPass?.trim() != newPass?.trim()) {
-			errorMessage.errorReNewPass =
-				"Mật khẩu xác nhận phải trùng với mật khẩu mới!";
+		if (requiredText(reNewPass)) {
+			errorMessage.errorReNewPass = requiredText(reNewPass);
+			isValid = false;
+		}
+		if (checkPassword(oldPass, newPass)) {
+			errorMessage.errorNewPass = checkPassword(oldPass, newPass);
+			isValid = false;
+		}
+		if (confirmPassword(reNewPass, newPass)) {
+			errorMessage.errorReNewPass = confirmPassword(reNewPass, newPass);
 			isValid = false;
 		}
 		!isValid && setValidate({ ...errorMessage });
@@ -84,7 +86,7 @@ export default PassScreen = (props) => {
 				newPassword: newPass,
 				reNewPassword: reNewPass,
 			};
-			const res = await userApi.ChangePassword(params);
+			const res = await UserApi.ChangePassword(params);
 			if (checkApi.check(res)) {
 				props.navigation.goBack();
 			}
@@ -104,112 +106,42 @@ export default PassScreen = (props) => {
 					paddingHorizontal: OPTION_STACK.spacingHorizontal,
 				}}
 			>
-				<View style={styles.rowContainer}>
+				<View style={{ marginTop: 30 }}>
 					<Text style={styles.label}>Mật khẩu cũ</Text>
-					<Input
-						secureTextEntry={hideOldPass}
-						placeholder="Mật khẩu cũ"
-						onChangeText={handleOldPassword}
-						errorMessage={validate?.errorOldPass}
-						onSubmitEditing={() => {
-							ref_passwords.current.focus();
-						}}
-						returnKeyType="next"
-						blurOnSubmit={false}
-						containerStyle={styles.containerStyle}
-						inputContainerStyle={styles.inputContainerStyle}
-						inputStyle={styles.inputStyle}
-						errorStyle={styles.errorStyle}
-						rightIcon={
-							<View>
-								{hideOldPass ? (
-									<SVGHidePassword
-										width={24}
-										height={24}
-										onPress={() => setHideOldPass(!hideOldPass)}
-									/>
-								) : (
-									<SVGShowPassword
-										width={24}
-										height={24}
-										onPress={() => setHideOldPass(!hideOldPass)}
-									/>
-								)}
-							</View>
-						}
-						rightIconContainerStyle={styles.rightIconContainerStyle}
+					<CustomInput
+						isPassInput={true}
+						isHide={hideOldPass}
+						title="Mật khẩu cũ"
+						errorValue={validate?.errorOldPass}
+						refNextInput={ref_passwords}
+						setIsHideValue={setHideOldPass}
+						handleValue={handleOldPassword}
 					/>
 				</View>
-				<View style={styles.rowContainer}>
+				<View>
 					<Text style={styles.label}>Mật khẩu mới</Text>
-					<Input
-						secureTextEntry={hideNewPass}
-						placeholder="Mật khẩu mới"
-						onChangeText={handleNewPassword}
-						onSubmitEditing={() => {
-							ref_re_passwords.current.focus();
-						}}
-						ref={ref_passwords}
-						errorMessage={validate?.errorNewPass}
-						returnKeyType="next"
-						blurOnSubmit={false}
-						containerStyle={styles.containerStyle}
-						inputContainerStyle={styles.inputContainerStyle}
-						inputStyle={styles.inputStyle}
-						errorStyle={styles.errorStyle}
-						rightIcon={
-							<View>
-								{hideNewPass ? (
-									<SVGHidePassword
-										width={24}
-										height={24}
-										onPress={() => setHideNewPass(!hideNewPass)}
-									/>
-								) : (
-									<SVGShowPassword
-										width={24}
-										height={24}
-										onPress={() => setHideNewPass(!hideNewPass)}
-									/>
-								)}
-							</View>
-						}
-						rightIconContainerStyle={styles.rightIconContainerStyle}
+					<CustomInput
+						isPassInput={true}
+						isHide={hideNewPass}
+						title="Mật khẩu mới"
+						errorValue={validate?.errorNewPass}
+						refInput={ref_passwords}
+						refNextInput={ref_re_passwords}
+						setIsHideValue={setHideNewPass}
+						handleValue={handleNewPassword}
 					/>
 				</View>
-				<View style={styles.rowContainer}>
+				<View>
 					<Text style={styles.label}>Nhập lại mật khẩu mới</Text>
-					<Input
-						secureTextEntry={hideReNewPass}
-						placeholder="Mật khẩu mới"
-						onChangeText={handleReNewPassword}
-						onSubmitEditing={changePassword}
-						ref={ref_re_passwords}
-						errorMessage={validate?.errorReNewPass}
-						returnKeyType="next"
-						blurOnSubmit={false}
-						containerStyle={styles.containerStyle}
-						inputContainerStyle={styles.inputContainerStyle}
-						inputStyle={styles.inputStyle}
-						errorStyle={styles.errorStyle}
-						rightIcon={
-							<View>
-								{hideReNewPass ? (
-									<SVGHidePassword
-										width={24}
-										height={24}
-										onPress={() => setHideReNewPass(!hideReNewPass)}
-									/>
-								) : (
-									<SVGShowPassword
-										width={24}
-										height={24}
-										onPress={() => setHideReNewPass(!hideReNewPass)}
-									/>
-								)}
-							</View>
-						}
-						rightIconContainerStyle={styles.rightIconContainerStyle}
+					<CustomInput
+						isPassInput={true}
+						isHide={hideReNewPass}
+						title="Mật khẩu mới"
+						errorValue={validate?.errorReNewPass}
+						refInput={ref_re_passwords}
+						setIsHideValue={setHideReNewPass}
+						handleValue={handleReNewPassword}
+						onSubmit={changePassword}
 					/>
 				</View>
 				<View style={{ height: 164 }}></View>
@@ -237,44 +169,9 @@ export default PassScreen = (props) => {
 };
 
 const styles = StyleSheet.create({
-	rowContainer: {
-		marginTop: 30,
-	},
 	label: {
 		fontFamily: "BeVietnamPro-600",
 		fontSize: 14,
-	},
-	containerStyle: {
-		flex: 1,
-		paddingLeft: 0,
-		paddingRight: 0,
-		marginTop: 12,
-	},
-	inputContainerStyle: {
-		borderBottomWidth: 0,
-	},
-	inputStyle: {
-		paddingHorizontal: 16,
-		borderRadius: 4,
-		borderWidth: 1,
-		borderColor: PALETTE.gray.GAINSBORO,
-		fontFamily: "BeVietnamPro-400",
-		fontSize: 14,
-		height: 56,
-	},
-	errorStyle: {
-		position: "absolute",
-		top: 50,
-		left: 10,
-	},
-	rightIconContainerStyle: {
-		position: "absolute",
-		right: 16,
-	},
-	imageBackground: {
-		zIndex: -1000,
-		position: "absolute",
-		bottom: -110,
-		width: Dimensions.get("screen").width,
+		marginBottom: 12,
 	},
 });

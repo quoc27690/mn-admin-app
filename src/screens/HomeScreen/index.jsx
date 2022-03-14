@@ -13,17 +13,9 @@ function HomeScreen({ navigation }) {
 		return unsubscribe;
 	}, [navigation]);
 
-	const dispatch = useDispatch();
 	return (
 		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
 			<Text>HomeScreen</Text>
-			<Button
-				title="Log out"
-				onPress={() => {
-					logOut();
-					dispatch(updateToken(null));
-				}}
-			/>
 		</View>
 	);
 }

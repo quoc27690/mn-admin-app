@@ -1,358 +1,290 @@
-// import { COLORS_PALETTE, OPTION_STACK, PALETTE } from "@common/style";
-// import DateTimePicker from "@react-native-community/datetimepicker";
-// import moment from "moment";
-// import React, { useEffect, useState } from "react";
-// import {
-// 	Dimensions,
-// 	Image,
-// 	Platform,
-// 	ScrollView,
-// 	StyleSheet,
-// 	Text,
-// 	TouchableWithoutFeedback,
-// 	View,
-// } from "react-native";
-// import { Button, Input } from "react-native-elements";
-// import {
-// 	SVGBirthday,
-// 	SVGCalendar,
-// 	SVGChangeAvatar,
-// 	SVGEmail,
-// 	SVGGiaoVien,
-// 	SVGLocation,
-// 	SVGPhone,
-// } from "../../../components/SVG";
-// import { HeaderApp } from "../../Navigator/Custom/HeaderApp";
-// import ProfileActions from "./Actions";
-// import {
-// 	SkeletonAvatarRow,
-// 	SkeletonInput,
-// } from "../../../components/SkeletonItems_ProfileScreen";
-// import { HostUrlPort } from "../../../common/Const";
+import { UserApi } from "@api/system";
+import checkApi from "@common/checkApi";
+import { HostUrlPort } from "@common/const";
+import { useIdentity } from "@common/identity";
+import { OPTION_STACK, PALETTE } from "@common/style";
+import {
+	requiredEmail,
+	requiredPhoneNumber,
+	requiredText,
+} from "@common/validateForm";
+import CustomInputGroup from "@components/CustomInputGroup";
+import ImageBg from "@components/ImageBg";
+import {
+	SVGChangeAvatar,
+	SVGEmail,
+	SVGGiaoVien,
+	SVGLocation,
+	SVGPhone,
+} from "@components/SVG";
+import React, { useEffect, useRef, useState } from "react";
+import { Image, ScrollView, Text, View } from "react-native";
+import { Button } from "react-native-elements";
+import { useDispatch, useSelector } from "react-redux";
+import * as ImagePicker from "expo-image-picker";
 
-// export default InfoScreen = (props) => {
-// 	const {
-// 		DataProfile,
-// 		Loading,
-// 		CheckValidate,
-// 		ErrorMessage,
-// 		ClearErrorMessage,
-// 		UpdateProfile,
-// 		Logout,
-// 		PickImage,
-// 		DraftAvatar,
-// 	} = ProfileActions();
-// 	const [showDatePicker, setShowDatePicker] = useState(false);
-// 	const [ngaySinh, setNgaySinh] = useState(new Date());
-// 	const [email, setEmail] = useState();
-// 	const [diaChi, setDiaChi] = useState();
-// 	const [sdt, setSDT] = useState();
-// 	const [avatar, setAvatar] = useState();
+const clearValidation = {
+	errorEmail: null,
+	errorDiaChi: null,
+	errorSDT: null,
+};
 
-// 	useEffect(() => {
-// 		if (DataProfile) {
-// 			setEmail(DataProfile?.Email);
-// 			setDiaChi(DataProfile?.DiaChi);
-// 			setNgaySinh(moment(DataProfile?.NgaySinh).toDate());
-// 			setSDT(DataProfile?.SDT);
-// 			setAvatar(DataProfile?.Avatar);
-// 		}
-// 	}, [DataProfile]);
+export default InfoScreen = () => {
+	const ref_sdt = useRef();
+	const ref_dc = useRef();
 
-// 	useEffect(() => {
-// 		ClearErrorMessage();
-// 	}, [diaChi, sdt, email]);
+	const { logOut } = useIdentity();
+	const dispatch = useDispatch();
+	const { currentUser } = useSelector((state) => state.user);
 
-// 	const onChange = (event, selectedDate) => {
-// 		const currentDate = selectedDate || ngaySinh;
-// 		setShowDatePicker(Platform.OS === "ios");
-// 		setNgaySinh(currentDate);
-// 	};
+	const [dataProfile, setDataProfile] = useState(null);
+	const [isLoading, setIsLoading] = useState(false);
+	const [validate, setValidate] = useState(clearValidation);
+	const [draftAvatar, setDraftAvatar] = useState(null);
+	const [email, setEmail] = useState(null);
+	const [address, setAddress] = useState(null);
+	const [phoneNumber, setPhoneNumber] = useState(null);
+	const [avatar, setAvatar] = useState(null);
 
-// 	const CapNhatThongTin = () => {
-// 		const props = { email, diaChi, sdt };
-// 		if (CheckValidate(props)) {
-// 			const params = {
-// 				...DataProfile,
-// 				Email: email,
-// 				DiaChi: diaChi,
-// 				SDT: sdt,
-// 				NgaySinh: ngaySinh,
-// 			};
-// 			UpdateProfile(params);
-// 		}
-// 		// props.navigation.goBack();
-// 	};
-// 	const userImg = require("../../../../assets/icon/user.png");
-// 	return (
-// 		<View style={styles.container}>
-// 			<HeaderApp title="Thông tin tài khoản" left />
-// 			<ScrollView
-// 				style={{
-// 					paddingHorizontal: PALETTE.spacingHorizontal,
-// 				}}
-// 			>
-// 				{Loading ? (
-// 					<View>
-// 						<View style={{ height: 72 }}>
-// 							<SkeletonAvatarRow />
-// 						</View>
-// 						<Text style={styles.infoText}>Thông tin cá nhân</Text>
-// 						<SkeletonInput height={42} />
-// 						<SkeletonInput height={42} />
-// 						<SkeletonInput height={42} />
-// 						<SkeletonInput height={126} />
-// 					</View>
-// 				) : (
-// 					<>
-// 						<View style={styles.headerContainer}>
-// 							<View style={styles.avatarContainer}>
-// 								<Image
-// 									source={
-// 										DraftAvatar
-// 											? { uri: DraftAvatar.uri }
-// 											: avatar
-// 											? {
-// 													uri: `${HostUrlPort(5400)}/${avatar}`,
-// 											  }
-// 											: userImg
-// 									}
-// 									style={styles.avatar}
-// 								/>
-// 								<SVGChangeAvatar
-// 									width={24}
-// 									height={24}
-// 									style={styles.iconChangeAvatar}
-// 									onPress={PickImage}
-// 								/>
-// 							</View>
-// 							<View style={styles.nameContainer}>
-// 								<Text style={styles.nameText}>{DataProfile?.HoTen}</Text>
-// 								<View style={styles.giaoVienContainer}>
-// 									<SVGGiaoVien width={12} height={12} />
-// 									<Text style={styles.giaoVienText}>Giáo viên</Text>
-// 								</View>
-// 							</View>
-// 						</View>
-// 						<Text style={styles.infoText}>Thông tin cá nhân</Text>
-// 						<View style={styles.rowContainer}>
-// 							<SVGBirthday width={24} height={24} color="#2175EF" />
-// 							<TouchableWithoutFeedback onPress={() => setShowDatePicker(true)}>
-// 								<View style={{ flex: 1 }}>
-// 									<Input
-// 										placeholder="Ngày sinh"
-// 										containerStyle={styles.containerStyle}
-// 										inputContainerStyle={styles.inputContainerStyle}
-// 										inputStyle={styles.inputStyle}
-// 										errorStyle={styles.errorStyle}
-// 										value={moment(ngaySinh).format("DD/MM/YYYY")}
-// 										editable={false}
-// 										rightIcon={<SVGCalendar width={16} height={16} />}
-// 										rightIconContainerStyle={styles.rightIconContainerStyle}
-// 									/>
-// 									{showDatePicker && (
-// 										<DateTimePicker
-// 											testID="dateTimePicker"
-// 											value={ngaySinh}
-// 											mode={"date"}
-// 											is24Hour={true}
-// 											display="default"
-// 											onChange={onChange}
-// 										/>
-// 									)}
-// 								</View>
-// 							</TouchableWithoutFeedback>
-// 						</View>
-// 						<View style={styles.rowContainer}>
-// 							<SVGEmail width={24} height={24} color="#2175EF" />
-// 							<Input
-// 								placeholder="Email"
-// 								containerStyle={styles.containerStyle}
-// 								inputContainerStyle={styles.inputContainerStyle}
-// 								inputStyle={styles.inputStyle}
-// 								errorStyle={styles.errorStyle}
-// 								value={email}
-// 								errorMessage={ErrorMessage.errorEmail}
-// 								onChangeText={setEmail}
-// 								returnKeyType="next"
-// 								blurOnSubmit={false}
-// 							/>
-// 						</View>
-// 						<View style={styles.rowContainer}>
-// 							<SVGPhone width={24} height={24} color="#2175EF" />
-// 							<Input
-// 								placeholder="Số điện thoại"
-// 								containerStyle={styles.containerStyle}
-// 								inputContainerStyle={styles.inputContainerStyle}
-// 								inputStyle={styles.inputStyle}
-// 								errorStyle={styles.errorStyle}
-// 								value={sdt}
-// 								errorMessage={ErrorMessage.errorSDT}
-// 								onChangeText={setSDT}
-// 								returnKeyType="next"
-// 								blurOnSubmit={false}
-// 							/>
-// 						</View>
-// 						<View style={[styles.rowContainer, { alignItems: "flex-start" }]}>
-// 							<View style={{ paddingTop: 4 }}>
-// 								<SVGLocation width={24} height={24} color="#2175EF" />
-// 							</View>
-// 							<Input
-// 								placeholder="Địa chỉ"
-// 								containerStyle={styles.containerStyle}
-// 								inputContainerStyle={styles.inputContainerStyle}
-// 								inputStyle={[
-// 									styles.inputStyle,
-// 									{
-// 										textAlignVertical: "top",
-// 										paddingVertical: 16,
-// 										height: 104,
-// 									},
-// 								]}
-// 								errorStyle={styles.errorStyle}
-// 								value={diaChi}
-// 								errorMessage={ErrorMessage.errorDiaChi}
-// 								onChangeText={setDiaChi}
-// 								returnKeyType="next"
-// 								blurOnSubmit={false}
-// 								multiline={true}
-// 							/>
-// 						</View>
-// 						<View style={styles.emptyView}></View>
-// 					</>
-// 				)}
-// 			</ScrollView>
-// 			<View style={styles.btnContainer}>
-// 				<Button
-// 					title="Cập nhật"
-// 					onPress={CapNhatThongTin}
-// 					loading={Loading}
-// 					buttonStyle={OPTION_STACK.buttonPrimary}
-// 					titleStyle={OPTION_STACK.buttonPrimaryText}
-// 				/>
-// 				<View style={{ marginTop: 16 }}>
-// 					<Button
-// 						title="Đăng xuất"
-// 						onPress={Logout}
-// 						loading={Loading}
-// 						buttonStyle={OPTION_STACK.buttonClose}
-// 						titleStyle={OPTION_STACK.buttonCloseText}
-// 					/>
-// 				</View>
-// 			</View>
-// 			<Image
-// 				source={require("../../../../assets/UI_App/profile-background.png")}
-// 				resizeMode="contain"
-// 				style={styles.imageBackground}
-// 			/>
-// 		</View>
-// 	);
-// };
+	console.log({draftAvatar});
 
-// const styles = StyleSheet.create({
-// 	container: {
-// 		flex: 1,
-// 		backgroundColor: PALETTE.backgroundScreen.WHITE,
-// 	},
-// 	emptyView: {
-// 		height: 164,
-// 	},
-// 	headerContainer: {
-// 		flexDirection: "row",
-// 		alignItems: "center",
-// 		marginTop: 16,
-// 	},
-// 	avatarContainer: {
-// 		position: "relative",
-// 		alignSelf: "flex-start",
-// 	},
-// 	avatar: {
-// 		width: 56,
-// 		height: 56,
-// 		borderRadius: 28,
-// 	},
-// 	iconChangeAvatar: {
-// 		position: "absolute",
-// 		right: -5,
-// 		bottom: 0,
-// 	},
-// 	nameContainer: {
-// 		marginLeft: 16,
-// 	},
-// 	nameText: {
-// 		fontFamily: "BeVietnamPro-700",
-// 		fontSize: 16,
-// 		textTransform: "capitalize",
-// 	},
-// 	giaoVienContainer: {
-// 		flexDirection: "row",
-// 		alignItems: "center",
-// 	},
-// 	giaoVienText: {
-// 		fontFamily: "BeVietnamPro-400",
-// 		fontSize: 12,
-// 		marginLeft: 4,
-// 	},
-// 	infoText: {
-// 		fontFamily: "BeVietnamPro-700",
-// 		fontSize: 16,
-// 		marginTop: 24,
-// 	},
-// 	rowContainer: {
-// 		flexDirection: "row",
-// 		alignItems: "center",
-// 		marginTop: 16,
-// 	},
-// 	containerStyle: {
-// 		flex: 1,
-// 		paddingLeft: 19,
-// 		paddingRight: 0,
-// 	},
-// 	inputContainerStyle: {
-// 		borderBottomWidth: 0,
-// 	},
-// 	inputStyle: {
-// 		paddingHorizontal: 16,
-// 		borderRadius: 4,
-// 		borderWidth: 1,
-// 		borderColor: COLORS_PALETTE.gray.GAINSBORO,
-// 		fontFamily: "BeVietnamPro-400",
-// 		fontSize: 14,
-// 		height: 47,
-// 	},
-// 	errorStyle: {
-// 		position: "absolute",
-// 		top: 40,
-// 		left: 30,
-// 	},
-// 	rightIconContainerStyle: {
-// 		position: "absolute",
-// 		right: 16,
-// 	},
-// 	btnContainer: {
-// 		zIndex: 1000,
-// 		position: "absolute",
-// 		bottom: 24,
-// 		left: PALETTE.spacingHorizontal,
-// 		right: PALETTE.spacingHorizontal,
-// 	},
-// 	imageBackground: {
-// 		zIndex: -1000,
-// 		position: "absolute",
-// 		bottom: -110,
-// 		width: Dimensions.get("screen").width,
-// 	},
-// });
+	useEffect(() => {
+		fetchData();
+	}, []);
 
-import { Text, View } from 'react-native'
-import React, { Component } from 'react'
+	useEffect(() => {
+		if (dataProfile) {
+			setEmail(dataProfile?.Email);
+			setAddress(dataProfile?.Address);
+			setPhoneNumber(dataProfile?.PhoneNumber);
+			setAvatar(dataProfile?.Avatar);
+		}
+	}, [dataProfile]);
 
-export default class InfoScreen extends Component {
-  render() {
-    return (
-      <View>
-        <Text>InfoScreen</Text>
-      </View>
-    )
-  }
-}
+	useEffect(() => {
+		clearErrorMessage();
+	}, [address, phoneNumber, email]);
+
+	const updateInfo = () => {
+		const props = { email, address, phoneNumber };
+		if (checkValidate(props)) {
+			const params = {
+				...dataProfile,
+				Email: email,
+				Address: address,
+				PhoneNumber: phoneNumber,
+			};
+			updateProfile(params);
+		}
+		// props.navigation.goBack();
+	};
+
+	const pickImage = async () => {
+		// No permissions request is necessary for launching the image library
+		let result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ImagePicker.MediaTypeOptions.All,
+			allowsEditing: true,
+			aspect: [4, 3],
+			quality: 1,
+		});
+		if (!result.cancelled) {
+			setDraftAvatar(result);
+		}
+	};
+	const checkValidate = (props) => {
+		let isValid = true;
+		const errorMessage = { ...clearValidation };
+		const { email, address, phoneNumber } = props;
+		if (requiredText(address)) {
+			errorMessage.errorDiaChi = requiredText(address);
+			isValid = false;
+		}
+		if (requiredText(email)) {
+			errorMessage.errorEmail = requiredText(email);
+			isValid = false;
+		}
+		if (requiredText(phoneNumber)) {
+			errorMessage.errorSDT = requiredText(phoneNumber);
+			isValid = false;
+		}
+		if (requiredEmail(email)) {
+			errorMessage.errorEmail = requiredEmail(email);
+			isValid = false;
+		}
+		if (requiredPhoneNumber(phoneNumber)) {
+			errorMessage.errorSDT = requiredPhoneNumber(phoneNumber);
+			isValid = false;
+		}
+		!isValid && setValidate({ ...errorMessage });
+		return isValid;
+	};
+
+	const fetchData = async () => {
+		setIsLoading(true);
+		const res = await UserApi.GetById(currentUser.Id);
+		if (checkApi.check(res)) {
+			setDataProfile(res.Item);
+		}
+		setIsLoading(false);
+	};
+
+	const clearErrorMessage = () => {
+		setValidate({ ...clearValidation });
+	};
+
+	const updateProfile = async (params) => {
+		const res = await UserApi.Update(params);
+		if (checkApi.check(res, true)) {
+			const currentUserObject = JSON.parse(JSON.stringify(currentUser));
+			if (draftAvatar) {
+				const formData = new FormData();
+				let extension = draftAvatar.uri.split(".");
+				formData.append("file", {
+					uri: draftAvatar.uri,
+					name: `avatar.${extension[extension.length - 1]}`,
+					type: `image/${extension[extension.length - 1]}`,
+				});
+				let res = await UserAPI.CapNhatAvatar(formData);
+				if (checkApi.check(res?.data, false, false)) {
+					const urlAvatar = res.data.Item;
+					currentUserObject.Avatar = urlAvatar;
+					setDraftAvatar(null);
+				}
+			}
+			SetItemOfStorage(
+				JSON.stringify(Const.CurrentUser),
+				JSON.stringify(currentUserObject)
+			).then(() => {
+				setDataProfile(params);
+				dispatch(actions.AuthActions.RefreshCurrentUser(true));
+			});
+		}
+	};
+
+	return (
+		<View
+			style={{
+				flex: 1,
+				backgroundColor: PALETTE.white,
+			}}
+		>
+			<ScrollView
+				style={{
+					paddingHorizontal: OPTION_STACK.spacingHorizontal,
+				}}
+			>
+				<View
+					style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}
+				>
+					<View style={{ position: "relative", alignSelf: "flex-start" }}>
+						<Image
+							source={
+								draftAvatar
+									? { uri: draftAvatar.uri }
+									: avatar
+									? {
+											uri: `${HostUrlPort(5400)}/${avatar}`,
+									  }
+									: require("@images/user.png")
+							}
+							style={{ width: 56, height: 56, borderRadius: 28 }}
+						/>
+						<SVGChangeAvatar
+							width={24}
+							height={24}
+							style={{ position: "absolute", right: -5, bottom: 0 }}
+							onPress={pickImage}
+						/>
+					</View>
+					<View style={{ marginLeft: 16 }}>
+						<Text
+							style={{
+								fontFamily: "BeVietnamPro-700",
+								fontSize: 16,
+								textTransform: "capitalize",
+							}}
+						>
+							{dataProfile?.FullName}
+						</Text>
+						<View style={{ flexDirection: "row", alignItems: "center" }}>
+							<SVGGiaoVien width={12} height={12} />
+							<Text
+								style={{
+									fontFamily: "BeVietnamPro-400",
+									fontSize: 12,
+									marginLeft: 4,
+								}}
+							>
+								Giáo viên
+							</Text>
+						</View>
+					</View>
+				</View>
+				<Text
+					style={{
+						fontFamily: "BeVietnamPro-700",
+						fontSize: 16,
+						marginTop: 24,
+						marginBottom: 16,
+					}}
+				>
+					Thông tin cá nhân
+				</Text>
+				<CustomInputGroup
+					iconComponent={<SVGEmail color={PALETTE.main} />}
+					value={email}
+					title="Email"
+					errorValue={validate.errorEmail}
+					refNextInput={ref_sdt}
+					handleValue={setEmail}
+				/>
+				<CustomInputGroup
+					iconComponent={<SVGPhone color={PALETTE.main} />}
+					value={phoneNumber}
+					title="Số điện thoại"
+					errorValue={validate.errorSDT}
+					refInput={ref_sdt}
+					refNextInput={ref_dc}
+					handleValue={setPhoneNumber}
+				/>
+				<CustomInputGroup
+					iconComponent={<SVGLocation color={PALETTE.main} />}
+					value={address}
+					title="Địa chỉ"
+					errorValue={validate.errorDiaChi}
+					refInput={ref_dc}
+					handleValue={setAddress}
+					multiline={true}
+				/>
+				<View style={{ height: 164 }}></View>
+			</ScrollView>
+			<View
+				style={{
+					zIndex: 1000,
+					position: "absolute",
+					bottom: 24,
+					left: OPTION_STACK.spacingHorizontal,
+					right: OPTION_STACK.spacingHorizontal,
+				}}
+			>
+				<Button
+					title="Cập nhật"
+					onPress={updateInfo}
+					isLoading={isLoading}
+					buttonStyle={OPTION_STACK.buttonPrimary.container}
+					titleStyle={OPTION_STACK.buttonPrimary.text}
+				/>
+				<View style={{ marginTop: 16 }}>
+					<Button
+						title="Đăng xuất"
+						onPress={logOut}
+						isLoading={isLoading}
+						buttonStyle={OPTION_STACK.buttonClose.container}
+						titleStyle={OPTION_STACK.buttonClose.text}
+					/>
+				</View>
+			</View>
+			<ImageBg />
+		</View>
+	);
+};

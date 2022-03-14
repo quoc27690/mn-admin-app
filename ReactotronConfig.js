@@ -1,5 +1,10 @@
 import Reactotron from "reactotron-react-native";
 
-Reactotron.configure({ host: "192.168.1.8" }) // controls connection & communication settings
+import { NativeModules } from "react-native";
+const scriptURL = NativeModules.SourceCode.scriptURL;
+const address = scriptURL.split("://")[1].split("/")[0];
+const hostname = address.split(":")[0];
+
+Reactotron.configure({ host: hostname }) // controls connection & communication settings
 	.useReactNative() // add all built-in react native plugins
 	.connect(); // let's connect!
