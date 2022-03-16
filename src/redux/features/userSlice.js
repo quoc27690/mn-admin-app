@@ -17,11 +17,14 @@ export const userSlice = createSlice({
 				const objUser = jwt_decode(action.payload);
 				state.currentUser = objUser;
 			} else {
-				state.currentUser = action.payload;
+				state.currentUser = null;
 			}
+		},
+		updateCurrentUser: (state, action) => {
+			state.currentUser = action.payload;
 		},
 	},
 });
 
-export const { updateToken } = userSlice.actions;
+export const { updateToken, updateCurrentUser } = userSlice.actions;
 export default userSlice.reducer;

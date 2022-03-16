@@ -1,3 +1,5 @@
-import UserApi from "./User.API";
+import UserApi from "./UserApi";
+import LopHocApi from "./LopHocApi";
+import HocSinhApi from "./HocSinhApi";
 
-export { UserApi };
+export { UserApi, LopHocApi, HocSinhApi };

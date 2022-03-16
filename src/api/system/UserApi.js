@@ -20,13 +20,13 @@ const UserApi = {
 		let resp = await Fetch.PUT(`${ControllerName}`, item);
 		return resp;
 	},
-	// UpdateAvatar: async (item) => {
-	// 	let resp = await Fetch.UPLOADImageByPut(
-	// 		`${ControllerName}/CapNhatAvatar`,
-	// 		item
-	// 	);
-	// 	return resp;
-	// },
+	UpdateAvatar: async (fdata) => {
+		let resp = await Fetch.PUTFormData(
+			`${ControllerName}/CapNhatAvatar`,
+			fdata
+		);
+		return resp;
+	},
 };
 
 export default UserApi;

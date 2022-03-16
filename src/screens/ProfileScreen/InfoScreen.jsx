@@ -6,7 +6,7 @@ import { OPTION_STACK, PALETTE } from "@common/style";
 import {
 	requiredEmail,
 	requiredPhoneNumber,
-	requiredText,
+	requiredText
 } from "@common/validateForm";
 import CustomInputGroup from "@components/CustomInputGroup";
 import ImageBg from "@components/ImageBg";
@@ -15,13 +15,14 @@ import {
 	SVGEmail,
 	SVGGiaoVien,
 	SVGLocation,
-	SVGPhone,
+	SVGPhone
 } from "@components/SVG";
+import { updateCurrentUser } from "@redux/features/userSlice";
+import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useRef, useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { Button } from "react-native-elements";
 import { useDispatch, useSelector } from "react-redux";
-import * as ImagePicker from "expo-image-picker";
 
 const clearValidation = {
 	errorEmail: null,
@@ -30,6 +31,7 @@ const clearValidation = {
 };
 
 export default InfoScreen = () => {
+	const [status, requestPermission] = ImagePicker.useMediaLibraryPermissions();
 	const ref_sdt = useRef();
 	const ref_dc = useRef();
 
@@ -45,8 +47,6 @@ export default InfoScreen = () => {
 	const [address, setAddress] = useState(null);
 	const [phoneNumber, setPhoneNumber] = useState(null);
 	const [avatar, setAvatar] = useState(null);
-
-	console.log({draftAvatar});
 
 	useEffect(() => {
 		fetchData();
@@ -65,32 +65,23 @@ export default InfoScreen = () => {
 		clearErrorMessage();
 	}, [address, phoneNumber, email]);
 
-	const updateInfo = () => {
-		const props = { email, address, phoneNumber };
-		if (checkValidate(props)) {
-			const params = {
-				...dataProfile,
-				Email: email,
-				Address: address,
-				PhoneNumber: phoneNumber,
-			};
-			updateProfile(params);
+	const pickImage = async () => {
+		const status = await requestPermission();
+		if (status.granted === true) {
+			let result = await ImagePicker.launchImageLibraryAsync({
+				mediaTypes: ImagePicker.MediaTypeOptions.All,
+				allowsEditing: true,
+				aspect: [4, 3],
+				quality: 1,
+			});
+			if (!result.cancelled) {
+				setDraftAvatar(result);
+			}
+		} else {
+			alert("Permission to access camera roll is required!");
 		}
-		// props.navigation.goBack();
 	};
 
-	const pickImage = async () => {
-		// No permissions request is necessary for launching the image library
-		let result = await ImagePicker.launchImageLibraryAsync({
-			mediaTypes: ImagePicker.MediaTypeOptions.All,
-			allowsEditing: true,
-			aspect: [4, 3],
-			quality: 1,
-		});
-		if (!result.cancelled) {
-			setDraftAvatar(result);
-		}
-	};
 	const checkValidate = (props) => {
 		let isValid = true;
 		const errorMessage = { ...clearValidation };
@@ -122,7 +113,7 @@ export default InfoScreen = () => {
 	const fetchData = async () => {
 		setIsLoading(true);
 		const res = await UserApi.GetById(currentUser.Id);
-		if (checkApi.check(res)) {
+		if (checkApi.check(res, false)) {
 			setDataProfile(res.Item);
 		}
 		setIsLoading(false);
@@ -132,159 +123,169 @@ export default InfoScreen = () => {
 		setValidate({ ...clearValidation });
 	};
 
-	const updateProfile = async (params) => {
-		const res = await UserApi.Update(params);
-		if (checkApi.check(res, true)) {
-			const currentUserObject = JSON.parse(JSON.stringify(currentUser));
-			if (draftAvatar) {
-				const formData = new FormData();
-				let extension = draftAvatar.uri.split(".");
-				formData.append("file", {
-					uri: draftAvatar.uri,
-					name: `avatar.${extension[extension.length - 1]}`,
-					type: `image/${extension[extension.length - 1]}`,
-				});
-				let res = await UserAPI.CapNhatAvatar(formData);
-				if (checkApi.check(res?.data, false, false)) {
-					const urlAvatar = res.data.Item;
-					currentUserObject.Avatar = urlAvatar;
-					setDraftAvatar(null);
+	const updateProfile = async () => {
+		const props = { email, address, phoneNumber };
+		if (checkValidate(props)) {
+			const params = {
+				...dataProfile,
+				Email: email,
+				Address: address,
+				PhoneNumber: phoneNumber,
+			};
+			setIsLoading(true);
+			const res = await UserApi.Update(params);
+			if (checkApi.check(res)) {
+				if (draftAvatar) {
+					const formData = new FormData();
+					let extension = draftAvatar.uri.split(".");
+					formData.append("file", {
+						uri: draftAvatar.uri,
+						name: `avatar.${extension[extension.length - 1]}`,
+						type: `image/${extension[extension.length - 1]}`,
+					});
+					let resAvatar = await UserApi.UpdateAvatar(formData);
+					if (checkApi.check(resAvatar?.data, false)) {
+						const currentUserClone = JSON.parse(JSON.stringify(currentUser));
+						currentUserClone.Avatar = resAvatar.data.Item;
+						params.Avatar = resAvatar.data.Item;
+						dispatch(updateCurrentUser(currentUserClone));
+						setDraftAvatar(null);
+					}
 				}
-			}
-			SetItemOfStorage(
-				JSON.stringify(Const.CurrentUser),
-				JSON.stringify(currentUserObject)
-			).then(() => {
 				setDataProfile(params);
-				dispatch(actions.AuthActions.RefreshCurrentUser(true));
-			});
+			}
+			setIsLoading(false);
 		}
 	};
 
 	return (
-		<View
-			style={{
-				flex: 1,
-				backgroundColor: PALETTE.white,
-			}}
-		>
-			<ScrollView
-				style={{
-					paddingHorizontal: OPTION_STACK.spacingHorizontal,
-				}}
-			>
-				<View
-					style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}
-				>
-					<View style={{ position: "relative", alignSelf: "flex-start" }}>
-						<Image
-							source={
-								draftAvatar
-									? { uri: draftAvatar.uri }
-									: avatar
-									? {
-											uri: `${HostUrlPort(5400)}/${avatar}`,
-									  }
-									: require("@images/user.png")
-							}
-							style={{ width: 56, height: 56, borderRadius: 28 }}
-						/>
-						<SVGChangeAvatar
-							width={24}
-							height={24}
-							style={{ position: "absolute", right: -5, bottom: 0 }}
-							onPress={pickImage}
-						/>
-					</View>
-					<View style={{ marginLeft: 16 }}>
-						<Text
-							style={{
-								fontFamily: "BeVietnamPro-700",
-								fontSize: 16,
-								textTransform: "capitalize",
-							}}
-						>
-							{dataProfile?.FullName}
-						</Text>
-						<View style={{ flexDirection: "row", alignItems: "center" }}>
-							<SVGGiaoVien width={12} height={12} />
-							<Text
-								style={{
-									fontFamily: "BeVietnamPro-400",
-									fontSize: 12,
-									marginLeft: 4,
-								}}
-							>
-								Giáo viên
-							</Text>
-						</View>
-					</View>
-				</View>
-				<Text
-					style={{
-						fontFamily: "BeVietnamPro-700",
-						fontSize: 16,
-						marginTop: 24,
-						marginBottom: 16,
-					}}
-				>
-					Thông tin cá nhân
-				</Text>
-				<CustomInputGroup
-					iconComponent={<SVGEmail color={PALETTE.main} />}
-					value={email}
-					title="Email"
-					errorValue={validate.errorEmail}
-					refNextInput={ref_sdt}
-					handleValue={setEmail}
-				/>
-				<CustomInputGroup
-					iconComponent={<SVGPhone color={PALETTE.main} />}
-					value={phoneNumber}
-					title="Số điện thoại"
-					errorValue={validate.errorSDT}
-					refInput={ref_sdt}
-					refNextInput={ref_dc}
-					handleValue={setPhoneNumber}
-				/>
-				<CustomInputGroup
-					iconComponent={<SVGLocation color={PALETTE.main} />}
-					value={address}
-					title="Địa chỉ"
-					errorValue={validate.errorDiaChi}
-					refInput={ref_dc}
-					handleValue={setAddress}
-					multiline={true}
-				/>
-				<View style={{ height: 164 }}></View>
-			</ScrollView>
 			<View
 				style={{
-					zIndex: 1000,
-					position: "absolute",
-					bottom: 24,
-					left: OPTION_STACK.spacingHorizontal,
-					right: OPTION_STACK.spacingHorizontal,
+					flex: 1,
+					backgroundColor: PALETTE.white,
 				}}
 			>
-				<Button
-					title="Cập nhật"
-					onPress={updateInfo}
-					isLoading={isLoading}
-					buttonStyle={OPTION_STACK.buttonPrimary.container}
-					titleStyle={OPTION_STACK.buttonPrimary.text}
-				/>
-				<View style={{ marginTop: 16 }}>
-					<Button
-						title="Đăng xuất"
-						onPress={logOut}
-						isLoading={isLoading}
-						buttonStyle={OPTION_STACK.buttonClose.container}
-						titleStyle={OPTION_STACK.buttonClose.text}
+				<ScrollView
+					style={{
+						paddingHorizontal: OPTION_STACK.spacingHorizontal,
+					}}
+				>
+					<View
+						style={{
+							flexDirection: "row",
+							alignItems: "center",
+							marginTop: 16,
+						}}
+					>
+						<View style={{ position: "relative", alignSelf: "flex-start" }}>
+							<Image
+								source={
+									draftAvatar
+										? { uri: draftAvatar.uri }
+										: avatar
+										? {
+												uri: `${HostUrlPort(5400)}/${avatar}`,
+										  }
+										: require("@images/user.png")
+								}
+								style={{ width: 56, height: 56, borderRadius: 28 }}
+							/>
+							<SVGChangeAvatar
+								width={24}
+								height={24}
+								style={{ position: "absolute", right: -5, bottom: 0 }}
+								onPress={pickImage}
+							/>
+						</View>
+						<View style={{ marginLeft: 16 }}>
+							<Text
+								style={{
+									fontFamily: "BeVietnamPro-700",
+									fontSize: 16,
+									textTransform: "capitalize",
+								}}
+							>
+								{dataProfile?.FullName}
+							</Text>
+							<View style={{ flexDirection: "row", alignItems: "center" }}>
+								<SVGGiaoVien width={12} height={12} />
+								<Text
+									style={{
+										fontFamily: "BeVietnamPro-400",
+										fontSize: 12,
+										marginLeft: 4,
+									}}
+								>
+									Giáo viên
+								</Text>
+							</View>
+						</View>
+					</View>
+					<Text
+						style={{
+							fontFamily: "BeVietnamPro-700",
+							fontSize: 16,
+							marginTop: 24,
+							marginBottom: 16,
+						}}
+					>
+						Thông tin cá nhân
+					</Text>
+					<CustomInputGroup
+						iconComponent={<SVGEmail color={PALETTE.main} />}
+						value={email}
+						title="Email"
+						errorValue={validate.errorEmail}
+						refNextInput={ref_sdt}
+						handleValue={setEmail}
 					/>
+					<CustomInputGroup
+						iconComponent={<SVGPhone color={PALETTE.main} />}
+						value={phoneNumber}
+						title="Số điện thoại"
+						errorValue={validate.errorSDT}
+						refInput={ref_sdt}
+						refNextInput={ref_dc}
+						handleValue={setPhoneNumber}
+					/>
+					<CustomInputGroup
+						iconComponent={<SVGLocation color={PALETTE.main} />}
+						value={address}
+						title="Địa chỉ"
+						errorValue={validate.errorDiaChi}
+						refInput={ref_dc}
+						handleValue={setAddress}
+						multiline={true}
+					/>
+					<View style={{ height: 164 }}></View>
+				</ScrollView>
+				<View
+					style={{
+						zIndex: 1000,
+						position: "absolute",
+						bottom: 24,
+						left: OPTION_STACK.spacingHorizontal,
+						right: OPTION_STACK.spacingHorizontal,
+					}}
+				>
+					<Button
+						title="Cập nhật"
+						onPress={updateProfile}
+						isLoading={isLoading}
+						buttonStyle={OPTION_STACK.buttonPrimary.container}
+						titleStyle={OPTION_STACK.buttonPrimary.text}
+					/>
+					<View style={{ marginTop: 16 }}>
+						<Button
+							title="Đăng xuất"
+							onPress={logOut}
+							isLoading={isLoading}
+							buttonStyle={OPTION_STACK.buttonClose.container}
+							titleStyle={OPTION_STACK.buttonClose.text}
+						/>
+					</View>
 				</View>
+				<ImageBg />
 			</View>
-			<ImageBg />
-		</View>
 	);
 };

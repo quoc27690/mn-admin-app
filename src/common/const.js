@@ -22,3 +22,5 @@ export const Res = {
 		Success: 0,
 	},
 };
+
+export const Nothing = "Không có dữ liệu";

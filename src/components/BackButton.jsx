@@ -1,11 +1,11 @@
 import React from "react";
-import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function BackButton(props) {
 	return (
-		<AntDesign
+		<Ionicons
 			{...props}
-			name="back"
+			name="arrow-back-outline"
 			size={24}
 			color="black"
 			style={{ marginRight: 16 }}

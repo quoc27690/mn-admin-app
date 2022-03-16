@@ -5,13 +5,6 @@ import { Button, Text, View } from "react-native";
 import { useDispatch } from "react-redux";
 
 function HomeScreen({ navigation }) {
-	React.useEffect(() => {
-		const unsubscribe = navigation.addListener("focus", () => {
-			const navigationDrawer = navigation.getParent();
-			navigationDrawer.setOptions({ headerShown: true });
-		});
-		return unsubscribe;
-	}, [navigation]);
 
 	return (
 		<View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>

@@ -71,6 +71,7 @@ const Fetch = {
 		let jsonData = await resp.json();
 		return jsonData;
 	},
+
 	DELETE_ARRAY: async (url, data) => {
 		const bearer_token = await getBearerToken();
 		let resp = await fetch(url, {
@@ -85,7 +86,8 @@ const Fetch = {
 		let jsonData = await resp.json();
 		return jsonData;
 	},
-	UPLOADFormData: async (url, fdata) => {
+
+	POSTFormData: async (url, fdata) => {
 		const bearer_token = await getBearerToken();
 		const config = {
 			headers: {
@@ -95,6 +97,7 @@ const Fetch = {
 		};
 		return post(url, fdata, config);
 	},
+
 	PUTFormData: async (url, fdata) => {
 		const bearer_token = await getBearerToken();
 		const config = {

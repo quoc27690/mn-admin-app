@@ -1,37 +1,37 @@
+import ImageBgHeader from "@components/ImageBgHeader";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import PHHSScreen from "@screens/HSScreen";
-import HSScreen from "@screens/PHHSScreen";
-import SettingStackScreen from "@stack/SettingStack";
+import HSScreen from "@screens/HSScreen";
+import PHHSScreen from "@screens/PHHSScreen";
 import React from "react";
-import { Text } from "react-native-elements";
 import TabNavigator from "./TabNavigator";
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigator = () => {
 	return (
-		<Drawer.Navigator
-			screenOptions={
-				{
-					// headerShown: false
-				}
-			}
-		>
+		<Drawer.Navigator screenOptions={{}}>
 			<Drawer.Screen
 				name="Main"
 				component={TabNavigator}
-				options={
-					{
-						// drawerLabel: () => null,
-						// drawerIcon: () => {
-						//   return <Text>abc</Text>
-						// },
-						// drawerActiveBackgroundColor: 'transparent'
-					}
-				}
+				options={{
+					title: "Trang chủ",
+					headerBackground: () => <ImageBgHeader />,
+				}}
 			/>
-			<Drawer.Screen name="HSScreen" component={HSScreen} />
-			<Drawer.Screen name="PHHSScreen" component={PHHSScreen} />
+			<Drawer.Screen
+				name="HSScreen"
+				component={HSScreen}
+				options={{
+					headerBackground: () => <ImageBgHeader />,
+				}}
+			/>
+			<Drawer.Screen
+				name="PHHSScreen"
+				component={PHHSScreen}
+				options={{
+					headerBackground: () => <ImageBgHeader />,
+				}}
+			/>
 		</Drawer.Navigator>
 	);
 };

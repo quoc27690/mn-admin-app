@@ -1,22 +1,14 @@
-import { AntDesign } from "@expo/vector-icons";
+import BackButton from "@components/BackButton";
+import ImageBgHeader from "@components/ImageBgHeader";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ProfileScreen from "@screens/ProfileScreen";
-import * as React from "react";
 import InfoScreen from "@screens/ProfileScreen/InfoScreen";
 import PassScreen from "@screens/ProfileScreen/PassScreen";
-import BackButton from "@components/BackButton";
+import * as React from "react";
 
 const SettingStack = createNativeStackNavigator();
 
 function ProfileStack({ navigation }) {
-	React.useEffect(() => {
-		const unsubscribe = navigation.addListener("focus", () => {
-			const navigationDrawer = navigation.getParent();
-			navigationDrawer.setOptions({ headerShown: false });
-		});
-		return unsubscribe;
-	}, [navigation]);
-
 	return (
 		<SettingStack.Navigator initialRouteName="Profile">
 			<SettingStack.Screen
@@ -31,6 +23,7 @@ function ProfileStack({ navigation }) {
 				component={InfoScreen}
 				options={{
 					title: "Thông tin tài khoản",
+					headerBackground: () => <ImageBgHeader />,
 					headerLeft: (props) => (
 						<BackButton
 							{...props}
@@ -39,7 +32,6 @@ function ProfileStack({ navigation }) {
 							}}
 						/>
 					),
-					headerShown: true,
 				}}
 			/>
 			<SettingStack.Screen
@@ -47,6 +39,7 @@ function ProfileStack({ navigation }) {
 				component={PassScreen}
 				options={{
 					title: "Đổi mật khẩu",
+					headerBackground: () => <ImageBgHeader />,
 					headerLeft: (props) => (
 						<BackButton
 							{...props}
@@ -55,7 +48,6 @@ function ProfileStack({ navigation }) {
 							}}
 						/>
 					),
-					headerShown: true,
 				}}
 			/>
 		</SettingStack.Navigator>

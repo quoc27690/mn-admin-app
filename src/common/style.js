@@ -11,10 +11,25 @@ const PALETTE = {
 		GAINSBORO: "#DCDCDC",
 		DIMGRAY: "#696969",
 	},
+	whiteFull: {
+		WHITE: "#FFFFFF",
+		HONEYDEW: "#F0FFF0",
+		GHOSTWHITE: "#F8F8FF",
+		WHITESMOKE: "#F5F5F5",
+		LAVENDERBLUSH: "#FFF0F5",
+		OLDLACE: "#FDF5E6",
+		AZURE: "#F0FFFF",
+	},
+	green: {
+		LIMEGREEN: "#32CD32",
+		FORESTGREEN: "#228B22",
+		TEAL: "#008080",
+		SEAGREEN: "#2E8B57",
+	},
 };
 const OPTION_STACK = {
 	spacingHorizontal: 22.5,
-	// spacingLine: 5,
+	spacingLine: 5,
 	buttonPrimary: {
 		container: {
 			height: 50,
