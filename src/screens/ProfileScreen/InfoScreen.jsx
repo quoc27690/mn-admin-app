@@ -8,6 +8,7 @@ import {
 	requiredPhoneNumber,
 	requiredText
 } from "@common/validateForm";
+import CustomButton from "@components/CustomButton";
 import CustomInputGroup from "@components/CustomInputGroup";
 import ImageBg from "@components/ImageBg";
 import {
@@ -21,7 +22,6 @@ import { updateCurrentUser } from "@redux/features/userSlice";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useRef, useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
-import { Button } from "react-native-elements";
 import { useDispatch, useSelector } from "react-redux";
 
 const clearValidation = {
@@ -159,133 +159,130 @@ export default InfoScreen = () => {
 	};
 
 	return (
-			<View
+		<View
+			style={{
+				flex: 1,
+				backgroundColor: PALETTE.white,
+			}}
+		>
+			<ScrollView
 				style={{
-					flex: 1,
-					backgroundColor: PALETTE.white,
+					paddingHorizontal: OPTION_STACK.spacingHorizontal,
 				}}
 			>
-				<ScrollView
-					style={{
-						paddingHorizontal: OPTION_STACK.spacingHorizontal,
-					}}
-				>
-					<View
-						style={{
-							flexDirection: "row",
-							alignItems: "center",
-							marginTop: 16,
-						}}
-					>
-						<View style={{ position: "relative", alignSelf: "flex-start" }}>
-							<Image
-								source={
-									draftAvatar
-										? { uri: draftAvatar.uri }
-										: avatar
-										? {
-												uri: `${HostUrlPort(5400)}/${avatar}`,
-										  }
-										: require("@images/user.png")
-								}
-								style={{ width: 56, height: 56, borderRadius: 28 }}
-							/>
-							<SVGChangeAvatar
-								width={24}
-								height={24}
-								style={{ position: "absolute", right: -5, bottom: 0 }}
-								onPress={pickImage}
-							/>
-						</View>
-						<View style={{ marginLeft: 16 }}>
-							<Text
-								style={{
-									fontFamily: "BeVietnamPro-700",
-									fontSize: 16,
-									textTransform: "capitalize",
-								}}
-							>
-								{dataProfile?.FullName}
-							</Text>
-							<View style={{ flexDirection: "row", alignItems: "center" }}>
-								<SVGGiaoVien width={12} height={12} />
-								<Text
-									style={{
-										fontFamily: "BeVietnamPro-400",
-										fontSize: 12,
-										marginLeft: 4,
-									}}
-								>
-									Giáo viên
-								</Text>
-							</View>
-						</View>
-					</View>
-					<Text
-						style={{
-							fontFamily: "BeVietnamPro-700",
-							fontSize: 16,
-							marginTop: 24,
-							marginBottom: 16,
-						}}
-					>
-						Thông tin cá nhân
-					</Text>
-					<CustomInputGroup
-						iconComponent={<SVGEmail color={PALETTE.main} />}
-						value={email}
-						title="Email"
-						errorValue={validate.errorEmail}
-						refNextInput={ref_sdt}
-						handleValue={setEmail}
-					/>
-					<CustomInputGroup
-						iconComponent={<SVGPhone color={PALETTE.main} />}
-						value={phoneNumber}
-						title="Số điện thoại"
-						errorValue={validate.errorSDT}
-						refInput={ref_sdt}
-						refNextInput={ref_dc}
-						handleValue={setPhoneNumber}
-					/>
-					<CustomInputGroup
-						iconComponent={<SVGLocation color={PALETTE.main} />}
-						value={address}
-						title="Địa chỉ"
-						errorValue={validate.errorDiaChi}
-						refInput={ref_dc}
-						handleValue={setAddress}
-						multiline={true}
-					/>
-					<View style={{ height: 164 }}></View>
-				</ScrollView>
 				<View
 					style={{
-						zIndex: 1000,
-						position: "absolute",
-						bottom: 24,
-						left: OPTION_STACK.spacingHorizontal,
-						right: OPTION_STACK.spacingHorizontal,
+						flexDirection: "row",
+						alignItems: "center",
+						marginTop: 16,
 					}}
 				>
-					<Button
-						title="Cập nhật"
-						onPress={updateProfile}
-						isLoading={isLoading}
-						buttonStyle={OPTION_STACK.buttonPrimary.container}
-						titleStyle={OPTION_STACK.buttonPrimary.text}
-					/>
-					<View style={{ marginTop: 16 }}>
-						<Button
-							title="Đăng xuất"
-							onPress={logOut}
-							isLoading={isLoading}
-							buttonStyle={OPTION_STACK.buttonClose.container}
-							titleStyle={OPTION_STACK.buttonClose.text}
+					<View style={{ position: "relative", alignSelf: "flex-start" }}>
+						<Image
+							source={
+								draftAvatar
+									? { uri: draftAvatar.uri }
+									: avatar
+									? {
+											uri: `${HostUrlPort(5400)}/${avatar}`,
+									  }
+									: require("@images/user.png")
+							}
+							style={{ width: 56, height: 56, borderRadius: 28 }}
+						/>
+						<SVGChangeAvatar
+							width={24}
+							height={24}
+							style={{ position: "absolute", right: -5, bottom: 0 }}
+							onPress={pickImage}
 						/>
 					</View>
+					<View style={{ marginLeft: 16 }}>
+						<Text
+							style={{
+								fontFamily: "BeVietnamPro-700",
+								fontSize: 16,
+								textTransform: "capitalize",
+							}}
+						>
+							{dataProfile?.FullName}
+						</Text>
+						<View style={{ flexDirection: "row", alignItems: "center" }}>
+							<SVGGiaoVien width={12} height={12} />
+							<Text
+								style={{
+									fontFamily: "BeVietnamPro-400",
+									fontSize: 12,
+									marginLeft: 4,
+								}}
+							>
+								Giáo viên
+							</Text>
+						</View>
+					</View>
 				</View>
-				<ImageBg />
+				<Text
+					style={{
+						fontFamily: "BeVietnamPro-700",
+						fontSize: 16,
+						marginTop: 24,
+						marginBottom: 16,
+					}}
+				>
+					Thông tin cá nhân
+				</Text>
+				<CustomInputGroup
+					iconComponent={<SVGEmail color={PALETTE.main} />}
+					value={email}
+					title="Email"
+					errorValue={validate.errorEmail}
+					refNextInput={ref_sdt}
+					handleValue={setEmail}
+				/>
+				<CustomInputGroup
+					iconComponent={<SVGPhone color={PALETTE.main} />}
+					value={phoneNumber}
+					title="Số điện thoại"
+					errorValue={validate.errorSDT}
+					refInput={ref_sdt}
+					refNextInput={ref_dc}
+					handleValue={setPhoneNumber}
+				/>
+				<CustomInputGroup
+					iconComponent={<SVGLocation color={PALETTE.main} />}
+					value={address}
+					title="Địa chỉ"
+					errorValue={validate.errorDiaChi}
+					refInput={ref_dc}
+					handleValue={setAddress}
+					multiline={true}
+				/>
+				<View style={{ height: 164 }}></View>
+			</ScrollView>
+			<View
+				style={{
+					zIndex: 1000,
+					position: "absolute",
+					bottom: 24,
+					left: OPTION_STACK.spacingHorizontal,
+					right: OPTION_STACK.spacingHorizontal,
+				}}
+			>
+				<CustomButton
+					title="Cập nhật"
+					onPress={updateProfile}
+					isLoading={isLoading}
+				/>
+				<View style={{ marginTop: 16 }}>
+					<CustomButton
+						isCloseBtn
+						title="Đăng xuất"
+						onPress={logOut}
+						isLoading={isLoading}
+					/>
+				</View>
 			</View>
+			<ImageBg />
+		</View>
 	);
 };

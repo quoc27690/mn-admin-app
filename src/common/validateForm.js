@@ -10,6 +10,13 @@ export const requiredText = (value) => {
 	return undefined;
 };
 
+export const requiredSelect = (value) => {
+	if (value === null) {
+		return "Dữ liệu không được để trống";
+	}
+	return undefined;
+};
+
 // Validate password
 export const requiredPassword = (value) =>
 	value &&

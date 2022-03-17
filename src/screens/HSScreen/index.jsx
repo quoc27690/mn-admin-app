@@ -2,22 +2,25 @@ import { HocSinhApi, LopHocApi } from "@api/system";
 import checkApi from "@common/checkApi";
 import { Nothing } from "@common/const";
 import { OPTION_STACK, PALETTE } from "@common/style";
-import React, { useEffect, useState } from "react";
-import { SectionList, Text, View } from "react-native";
-import CardHocSinh from "./components/CardHocSinh";
+import { Entypo } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
+import React, { useEffect, useState } from "react";
+import { SectionList, Text, TouchableOpacity, View } from "react-native";
 import { SearchBar } from "react-native-elements";
+import CardHocSinh from "./components/CardHocSinh";
+import ModalInsertOrUpdate from "./components/ModalInsertOrUpdate";
 
 function HSScreen({ navigation, route }) {
 	const [listHSAll, setListHSAll] = useState([]);
 	const [listHS, setListHS] = useState([]);
 	const [listLopHoc, setListLopHoc] = useState([]);
-	const [isLoading, setIsLoading] = useState(false);
+	const [sectionList, setSectionList] = useState([]);
 	const [selectedNamHoc, setSelectedNamHoc] = useState(null);
 	const [searchValue, setSearchValue] = useState(null);
-	const [sectionList, setSectionList] = useState([]);
+	const [isLoading, setIsLoading] = useState(false);
+	const [isShowModal, setIsShowModal] = useState(false);
 
-	console.log({ listHS, listLopHoc });
+	// console.log({ listHS, listLopHoc });
 
 	useEffect(() => {
 		(async () => {
@@ -59,8 +62,8 @@ function HSScreen({ navigation, route }) {
 		//Lọc dữ liệu -> tách thành group theo chữ cái đầu tiên của tên học sinh -> dùng cho sectionList
 		//Lấy danh sách chữ cái đầu của tên tất cả học sinh
 		let listHeader = [];
-		searchData?.length > 0 &&
-			searchData.forEach((x) => {
+		listHS?.length > 0 &&
+			listHS.forEach((x) => {
 				let firstCharacter = "";
 				let arr = x.HoTen.split(" ");
 				firstCharacter = arr[arr.length - 1].charAt(0).toUpperCase();
@@ -83,7 +86,7 @@ function HSScreen({ navigation, route }) {
 		let listData = [];
 		listHeader.forEach((x, i) => {
 			listData.push({ title: x, data: [] });
-			searchData.forEach((y) => {
+			listHS.forEach((y) => {
 				let firstCharacter = "";
 				let arr = y.HoTen.split(" ");
 				firstCharacter = arr[arr.length - 1].charAt(0).toUpperCase();
@@ -109,8 +112,21 @@ function HSScreen({ navigation, route }) {
 		setSectionList(listData);
 	};
 
+	const onOpenModal = () => {
+		setIsShowModal(true);
+	};
+
+	const onCloseModal = () => {
+		setIsShowModal(false);
+	};
+
 	return (
-		<View style={{ flex: 1 }}>
+		<View
+			style={{
+				flex: 1,
+				position: "relative",
+			}}
+		>
 			<View
 				style={{
 					padding: OPTION_STACK.spacingHorizontal,
@@ -121,62 +137,54 @@ function HSScreen({ navigation, route }) {
 					style={{
 						display: "flex",
 						flexDirection: "row",
-						justifyContent: "space-between",
 					}}
 				>
-					<View
-						style={{
-							borderWidth: 1,
-							borderColor: PALETTE.gray.DIMGRAY,
-							borderRadius: 8,
-							width: "48%",
-						}}
+					<Picker
+						selectedValue={selectedNamHoc}
+						onValueChange={(itemValue, itemIndex) =>
+							setSelectedNamHoc(itemValue)
+						}
+						style={{ width: "50%" }}
 					>
-						<Picker
-							selectedValue={selectedNamHoc}
-							onValueChange={(itemValue, itemIndex) =>
-								setSelectedNamHoc(itemValue)
-							}
-						>
-							<Picker.Item label="Java" value="java" enabled={false} />
-							<Picker.Item label="Java" value="java" />
-							<Picker.Item label="JavaScript" value="js" />
-						</Picker>
-					</View>
-					<View
-						style={{
-							borderWidth: 1,
-							borderColor: PALETTE.gray.DIMGRAY,
-							borderRadius: 8,
-							width: "48%",
-						}}
+						<Picker.Item
+							label="Chọn năm học"
+							value="0"
+							enabled={false}
+							color={PALETTE.gray.DIMGRAY}
+						/>
+						<Picker.Item label="Java" value="java" />
+						<Picker.Item label="JavaScript" value="js" />
+					</Picker>
+					<Picker
+						selectedValue={selectedNamHoc}
+						onValueChange={(itemValue, itemIndex) =>
+							setSelectedNamHoc(itemValue)
+						}
+						style={{ width: "50%" }}
 					>
-						<Picker
-							selectedValue={selectedNamHoc}
-							onValueChange={(itemValue, itemIndex) =>
-								setSelectedNamHoc(itemValue)
-							}
-						>
-							<Picker.Item label="Java" value="java" />
-							<Picker.Item label="JavaScript" value="js" />
-						</Picker>
-					</View>
+						<Picker.Item
+							label="Chọn lớp học"
+							value="0"
+							enabled={false}
+							color={PALETTE.gray.DIMGRAY}
+						/>
+						<Picker.Item label="Java" value="java" />
+						<Picker.Item label="JavaScript" value="js" />
+					</Picker>
 				</View>
 				<SearchBar
 					placeholder="Tìm học sinh"
-					round
+					// round
 					onChangeText={(value) => onSearch(value)}
 					value={searchValue}
 					containerStyle={{
 						backgroundColor: PALETTE.white,
 						padding: 0,
-						paddingTop: OPTION_STACK.spacingHorizontal,
 						borderTopWidth: 0,
 						borderBottomWidth: 0,
 					}}
 					inputContainerStyle={{
-						backgroundColor: PALETTE.gray.GAINSBORO,
-						// backgroundColor: "green",
+						backgroundColor: PALETTE.whiteFull.GHOSTWHITE,
 						borderRadius: 8,
 					}}
 					inputStyle={{ fontFamily: "BeVietnamPro-400", fontSize: 14 }}
@@ -188,14 +196,13 @@ function HSScreen({ navigation, route }) {
 					sections={sectionList}
 					keyExtractor={(item, index) => item + index}
 					renderItem={({ item, index }) => (
-						// <CardHocSinh
-						// 	data={item}
-						// 	// namHoc={infoClass?.NamHoc}
-						// 	// lopHoc={infoClass?.TenLop}
-						// 	index={index}
-						// 	navigation={navigation}
-						// />
-						<Text>abc</Text>
+						<CardHocSinh
+							data={item}
+							// namHoc={infoClass?.NamHoc}
+							// lopHoc={infoClass?.TenLop}
+							index={index}
+							navigation={navigation}
+						/>
 					)}
 					renderSectionHeader={({ section: { title } }) => (
 						<View
@@ -214,6 +221,23 @@ function HSScreen({ navigation, route }) {
 			) : (
 				<Text>{Nothing}</Text>
 			)}
+			<TouchableOpacity
+				style={{
+					backgroundColor: PALETTE.main,
+					width: 48,
+					height: 48,
+					borderRadius: 24,
+					alignItems: "center",
+					justifyContent: "center",
+					position: "absolute",
+					right: OPTION_STACK.spacingHorizontal,
+					bottom: OPTION_STACK.spacingHorizontal,
+				}}
+				onPress={onOpenModal}
+			>
+				<Entypo name="plus" size={24} color={PALETTE.white} />
+			</TouchableOpacity>
+			<ModalInsertOrUpdate isShowModal={isShowModal} onClose={onCloseModal} />
 		</View>
 	);
 }

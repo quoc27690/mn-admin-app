@@ -11,7 +11,7 @@ const SvgComponent = (props) => (
     viewBox="0 0 17 16"
     {...props}
   >
-    <G stroke="#3A3C4B" strokeMiterlimit={10} clipPath="url(#clip0_1745_11817)">
+    <G stroke={props?.color ? props.color : "#3A3C4B"} strokeMiterlimit={10} clipPath="url(#clip0_1745_11817)">
       <Path
         strokeLinecap="square"
         d="M5.167 11.333a4 4 0 100-8 4 4 0 000 8zM5.167 11.333v4M3.833 14H6.5"

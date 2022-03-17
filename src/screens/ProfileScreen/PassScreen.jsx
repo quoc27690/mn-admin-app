@@ -2,16 +2,15 @@ import { UserApi } from "@api/system";
 import checkApi from "@common/checkApi";
 import { OPTION_STACK, PALETTE } from "@common/style";
 import {
-	confirmPassword,
+	checkPassword, confirmPassword,
 	requiredPassword,
-	requiredText,
-	checkPassword,
+	requiredText
 } from "@common/validateForm";
+import CustomButton from "@components/CustomButton";
 import CustomInput from "@components/CustomInput";
 import ImageBg from "@components/ImageBg";
 import React, { useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { Button } from "react-native-elements";
 import { useSelector } from "react-redux";
 
 export default PassScreen = (props) => {
@@ -109,7 +108,6 @@ export default PassScreen = (props) => {
 				<View style={{ marginTop: 30 }}>
 					<Text style={styles.label}>Mật khẩu cũ</Text>
 					<CustomInput
-						isPassInput={true}
 						isHide={hideOldPass}
 						title="Mật khẩu cũ"
 						errorValue={validate?.errorOldPass}
@@ -121,7 +119,6 @@ export default PassScreen = (props) => {
 				<View>
 					<Text style={styles.label}>Mật khẩu mới</Text>
 					<CustomInput
-						isPassInput={true}
 						isHide={hideNewPass}
 						title="Mật khẩu mới"
 						errorValue={validate?.errorNewPass}
@@ -134,7 +131,6 @@ export default PassScreen = (props) => {
 				<View>
 					<Text style={styles.label}>Nhập lại mật khẩu mới</Text>
 					<CustomInput
-						isPassInput={true}
 						isHide={hideReNewPass}
 						title="Mật khẩu mới"
 						errorValue={validate?.errorReNewPass}
@@ -155,12 +151,10 @@ export default PassScreen = (props) => {
 					right: OPTION_STACK.spacingHorizontal,
 				}}
 			>
-				<Button
+				<CustomButton
 					title="Cập nhật"
 					onPress={changePassword}
 					isLoading={isLoading}
-					buttonStyle={OPTION_STACK.buttonPrimary.container}
-					titleStyle={OPTION_STACK.buttonPrimary.text}
 				/>
 			</View>
 			<ImageBg />

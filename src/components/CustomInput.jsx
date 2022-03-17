@@ -7,13 +7,13 @@ import { SVGHidePassword, SVGShowPassword } from "./SVG";
 export default function CustomInput(props) {
 	const {
 		value = null,
-		isPassInput = false,
-		isHide = false,
+		isHide = null,
 		title = null,
 		errorValue = null,
 		refInput = null,
 		refNextInput = null,
 		multiline = false,
+		editable = true,
 		setIsHideValue = () => {},
 		handleValue = () => {},
 		onSubmit = () => {},
@@ -33,9 +33,10 @@ export default function CustomInput(props) {
 			ref={refInput}
 			returnKeyType="next"
 			multiline={multiline}
+			editable={editable}
 			blurOnSubmit={false}
 			rightIcon={
-				isPassInput && (
+				isHide !== null && (
 					<View>
 						{isHide ? (
 							<SVGHidePassword

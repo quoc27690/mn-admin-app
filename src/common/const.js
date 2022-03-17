@@ -23,4 +23,9 @@ export const Res = {
 	},
 };
 
+export const Gender = [
+	{ value: 0, label: "Nam" },
+	{ value: 1, label: "Nữ" },
+];
+
 export const Nothing = "Không có dữ liệu";

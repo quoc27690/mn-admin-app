@@ -1,40 +1,57 @@
 import React from "react";
 import { View } from "react-native";
+import CustomDropdown from "./CustomDropdown";
 import CustomInput from "./CustomInput";
 
 export default function CustomInputGroup(props) {
 	const {
+		type = "text",
 		iconComponent = null,
 		value = null,
-		isPassInput = false,
-		isHide = false,
+		isHide = null,
 		title = null,
 		errorValue = null,
 		refInput = null,
 		refNextInput = null,
 		multiline = false,
+		editable = true,
 		setIsHideValue = () => {},
 		handleValue = () => {},
 		onSubmit = () => {},
+
+		// prop for type="dropdown"
+		selectedValue = null,
+		options = [],
+		setSelectedValue = () => {},
 	} = props;
 
 	return (
 		<View style={{ flexDirection: "row" }}>
 			<View style={{ marginTop: 13 }}>{iconComponent}</View>
 			<View style={{ flex: 1, marginLeft: 19 }}>
-				<CustomInput
-					value={value}
-					isPassInput={isPassInput}
-					isHide={isHide}
-					title={title}
-					errorValue={errorValue}
-					refInput={refInput}
-					refNextInput={refNextInput}
-					multiline={multiline}
-					setIsHideValue={setIsHideValue}
-					handleValue={handleValue}
-					onSubmit={onSubmit}
-				/>
+				{type === "text" ? (
+					<CustomInput
+						value={value}
+						isHide={isHide}
+						title={title}
+						errorValue={errorValue}
+						refInput={refInput}
+						refNextInput={refNextInput}
+						multiline={multiline}
+						editable={editable}
+						setIsHideValue={setIsHideValue}
+						handleValue={handleValue}
+						onSubmit={onSubmit}
+					/>
+				) : type === "dropdown" ? (
+					<CustomDropdown
+						title={title}
+						selectedValue={selectedValue}
+						options={options}
+						setSelectedValue={setSelectedValue}
+						errorValue={errorValue}
+					/>
+				) : null}
 			</View>
 		</View>
 	);

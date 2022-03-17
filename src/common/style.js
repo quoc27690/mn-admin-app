@@ -27,36 +27,10 @@ const PALETTE = {
 		SEAGREEN: "#2E8B57",
 	},
 };
+
 const OPTION_STACK = {
 	spacingHorizontal: 22.5,
 	spacingLine: 5,
-	buttonPrimary: {
-		container: {
-			height: 50,
-			borderRadius: 5,
-			backgroundColor: PALETTE.main,
-		},
-		text: {
-			fontFamily: "BeVietnamPro-600",
-			fontSize: 16,
-			color: PALETTE.white,
-			textTransform: "uppercase",
-		},
-	},
-	buttonClose: {
-		container: {
-			height: 50,
-			borderRadius: 5,
-			borderWidth: 1,
-			borderColor: PALETTE.main,
-			backgroundColor: PALETTE.white,
-		},
-		text: {
-			fontFamily: "BeVietnamPro-600",
-			fontSize: 16,
-			color: PALETTE.main,
-			textTransform: "uppercase",
-		},
-	},
 };
+
 export { OPTION_STACK, STATUSBAR_HEIGHT, PALETTE };

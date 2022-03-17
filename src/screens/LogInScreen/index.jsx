@@ -5,15 +5,16 @@ import {
 	deleteSaveUser,
 	getSaveUser,
 	setSaveUser,
-	useIdentity,
+	useIdentity
 } from "@common/identity";
 import { OPTION_STACK } from "@common/style";
 import { requiredText } from "@common/validateForm";
+import CustomButton from "@components/CustomButton";
 import CustomInputGroup from "@components/CustomInputGroup";
 import { SVGLoginPassword, SVGLoginUser } from "@components/SVG";
 import React, { useEffect, useRef, useState } from "react";
 import { Image, ImageBackground, View } from "react-native";
-import { Button, CheckBox } from "react-native-elements";
+import { CheckBox } from "react-native-elements";
 
 const clearValidation = {
 	errorUsername: null,
@@ -128,7 +129,6 @@ export default LogInScreen = (props) => {
 				<CustomInputGroup
 					iconComponent={<SVGLoginPassword />}
 					value={password}
-					isPassInput={true}
 					isHide={isHidePass}
 					title="Mật khẩu"
 					errorValue={validate.errorPassword}
@@ -156,12 +156,10 @@ export default LogInScreen = (props) => {
 					/>
 				</View>
 				<View style={{ marginTop: 25 }}>
-					<Button
+					<CustomButton
 						title="Đăng nhập"
 						onPress={login}
-						loading={isLoading}
-						buttonStyle={OPTION_STACK.buttonPrimary.container}
-						titleStyle={OPTION_STACK.buttonPrimary.text}
+						isLoading={isLoading}
 					/>
 				</View>
 			</View>
