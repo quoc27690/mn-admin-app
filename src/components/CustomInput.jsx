@@ -1,11 +1,12 @@
 import { PALETTE } from "@common/style";
 import React from "react";
-import { View } from "react-native";
 import { Input } from "react-native-elements";
 import { SVGHidePassword, SVGShowPassword } from "./SVG";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function CustomInput(props) {
 	const {
+		type = "text",
 		value = null,
 		isHide = null,
 		title = null,
@@ -36,22 +37,26 @@ export default function CustomInput(props) {
 			editable={editable}
 			blurOnSubmit={false}
 			rightIcon={
-				isHide !== null && (
-					<View>
-						{isHide ? (
-							<SVGHidePassword
-								width={16}
-								height={16}
-								onPress={() => setIsHideValue(!isHide)}
-							/>
-						) : (
-							<SVGShowPassword
-								width={16}
-								height={16}
-								onPress={() => setIsHideValue(!isHide)}
-							/>
-						)}
-					</View>
+				type === "date" ? (
+					<Ionicons name="calendar-outline" size={16} color={PALETTE.main} />
+				) : (
+					isHide !== null && (
+						<>
+							{isHide ? (
+								<SVGHidePassword
+									width={16}
+									height={16}
+									onPress={() => setIsHideValue(!isHide)}
+								/>
+							) : (
+								<SVGShowPassword
+									width={16}
+									height={16}
+									onPress={() => setIsHideValue(!isHide)}
+								/>
+							)}
+						</>
+					)
 				)
 			}
 			containerStyle={{

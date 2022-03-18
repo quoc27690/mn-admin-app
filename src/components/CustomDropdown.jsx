@@ -1,7 +1,7 @@
 import { PALETTE } from "@common/style";
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 
 export default function CustomDropdown(props) {
 	const {
@@ -12,40 +12,52 @@ export default function CustomDropdown(props) {
 		setSelectedValue = () => {},
 	} = props;
 	return (
-		<View
-			style={{
-				borderWidth: 1,
-				borderRadius: 4,
-				borderColor: PALETTE.gray.GAINSBORO,
-				paddingLeft: 5,
-			}}
-		>
-			<Picker
-				selectedValue={selectedValue}
-				onValueChange={(itemValue, itemIndex) => setSelectedValue(itemValue)}
-				style={{}}
-				itemStyle={{}}
+		<>
+			<View
+				style={{
+					borderWidth: 1,
+					borderRadius: 4,
+					borderColor: PALETTE.gray.GAINSBORO,
+					paddingLeft: 5,
+				}}
 			>
-				<Picker.Item
-					label={title}
-					value={null}
-					enabled={false}
-					color={PALETTE.gray.DIMGRAY}
-					style={{
-						fontSize: 12,
-					}}
-				/>
-				{options.map((x, i) => (
+				<Picker
+					selectedValue={selectedValue}
+					onValueChange={(itemValue, itemIndex) => setSelectedValue(itemValue)}
+					style={{}}
+					itemStyle={{}}
+				>
 					<Picker.Item
-						label={x.label}
-						value={x.value}
-						key={i}
+						label={title}
+						value={null}
+						// enabled={false}
+						color={PALETTE.gray.DIMGRAY}
 						style={{
 							fontSize: 12,
 						}}
 					/>
-				))}
-			</Picker>
-		</View>
+					{options.map((x, i) => (
+						<Picker.Item
+							label={x.label}
+							value={x.value}
+							key={i}
+							style={{
+								fontSize: 12,
+							}}
+						/>
+					))}
+				</Picker>
+			</View>
+			<Text
+				style={{
+					color: PALETTE.red.RED,
+					fontSize: 12,
+					marginLeft: 5,
+					marginTop: 5,
+				}}
+			>
+				{errorValue}
+			</Text>
+		</>
 	);
 }

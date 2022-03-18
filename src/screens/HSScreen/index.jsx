@@ -5,7 +5,7 @@ import { OPTION_STACK, PALETTE } from "@common/style";
 import { Entypo } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import React, { useEffect, useState } from "react";
-import { SectionList, Text, TouchableOpacity, View } from "react-native";
+import { SectionList, Text, TouchableOpacity, View, Alert } from "react-native";
 import { SearchBar } from "react-native-elements";
 import CardHocSinh from "./components/CardHocSinh";
 import ModalInsertOrUpdate from "./components/ModalInsertOrUpdate";
@@ -17,6 +17,7 @@ function HSScreen({ navigation, route }) {
 	const [sectionList, setSectionList] = useState([]);
 	const [selectedNamHoc, setSelectedNamHoc] = useState(null);
 	const [searchValue, setSearchValue] = useState(null);
+	const [editId, setEditId] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isShowModal, setIsShowModal] = useState(false);
 
@@ -112,13 +113,53 @@ function HSScreen({ navigation, route }) {
 		setSectionList(listData);
 	};
 
-	const onOpenModal = () => {
+	const onOpenModal = (id) => {
+		if (id) {
+			setEditId(id);
+		}
 		setIsShowModal(true);
 	};
 
 	const onCloseModal = () => {
+		if (editId) {
+			setEditId(null);
+		}
 		setIsShowModal(false);
 	};
+
+	const onDelete = async (id) => {
+		const reuslt = await AsyncAlert(id);
+		return reuslt;
+	};
+
+	const AsyncAlert = async (id) =>
+		new Promise((resolve) => {
+			Alert.alert(
+				"Bạn có muốn xóa học sinh này",
+				"",
+				[
+					{
+						text: "Hủy",
+						onPress: () => console.log("Cancel Pressed"),
+					},
+					{
+						text: "ok",
+						onPress: async () => {
+							setIsLoading(true);
+							let resp = await HocSinhApi.Delete([id]);
+							if (checkApi.check(resp)) {
+								let listHSClone = JSON.parse(JSON.stringify(listHS));
+								listHSClone = listHSClone.filter((x) => x.Id !== id);
+								setListHS(listHSClone);
+								resolve(true);
+							}
+							setIsLoading(false);
+						},
+					},
+				],
+				{ cancelable: false }
+			);
+		});
 
 	return (
 		<View
@@ -174,7 +215,6 @@ function HSScreen({ navigation, route }) {
 				</View>
 				<SearchBar
 					placeholder="Tìm học sinh"
-					// round
 					onChangeText={(value) => onSearch(value)}
 					value={searchValue}
 					containerStyle={{
@@ -197,11 +237,11 @@ function HSScreen({ navigation, route }) {
 					keyExtractor={(item, index) => item + index}
 					renderItem={({ item, index }) => (
 						<CardHocSinh
-							data={item}
-							// namHoc={infoClass?.NamHoc}
-							// lopHoc={infoClass?.TenLop}
+							item={item}
 							index={index}
 							navigation={navigation}
+							onOpenModal={onOpenModal}
+							onDelete={onDelete}
 						/>
 					)}
 					renderSectionHeader={({ section: { title } }) => (
@@ -233,11 +273,15 @@ function HSScreen({ navigation, route }) {
 					right: OPTION_STACK.spacingHorizontal,
 					bottom: OPTION_STACK.spacingHorizontal,
 				}}
-				onPress={onOpenModal}
+				onPress={() => onOpenModal(null)}
 			>
 				<Entypo name="plus" size={24} color={PALETTE.white} />
 			</TouchableOpacity>
-			<ModalInsertOrUpdate isShowModal={isShowModal} onClose={onCloseModal} />
+			<ModalInsertOrUpdate
+				isShowModal={isShowModal}
+				editId={editId}
+				onClose={onCloseModal}
+			/>
 		</View>
 	);
 }

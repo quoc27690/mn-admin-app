@@ -26,6 +26,10 @@ const PALETTE = {
 		TEAL: "#008080",
 		SEAGREEN: "#2E8B57",
 	},
+	red: {
+		RED: "#FF0000",
+		DARKRED: "#8B0000",
+	},
 };
 
 const OPTION_STACK = {

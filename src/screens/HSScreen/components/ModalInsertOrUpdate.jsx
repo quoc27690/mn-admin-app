@@ -1,3 +1,5 @@
+import { HocSinhApi } from "@api/system";
+import checkApi from "@common/checkApi";
 import { Gender } from "@common/const";
 import { PALETTE } from "@common/style";
 import { requiredSelect, requiredText } from "@common/validateForm";
@@ -16,7 +18,7 @@ const clearValidation = {
 };
 
 export default function ModalInsertOrUpdate(props) {
-	const { isShowModal = false, onClose = () => {} } = props;
+	const { isShowModal = false, editId = null, onClose = () => {} } = props;
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [isShowDateTimePicker, setIsShowDateTimePicker] = useState(false);
@@ -26,13 +28,30 @@ export default function ModalInsertOrUpdate(props) {
 	const [validate, setValidate] = useState(clearValidation);
 
 	useEffect(() => {
+		if (editId) {
+			fetchById();
+		}
 		return () => {
-			setGender(null);
-			setBirthday(null);
 			setName(null);
+			setBirthday(null);
+			setGender(null);
 			setValidate(clearValidation);
 		};
 	}, [isShowModal]);
+
+	const fetchById = async () => {
+		let res = await HocSinhApi.GetById(editId);
+		if (checkApi.check(res, false)) {
+			const item = res.Item;
+			setName(item.HoTen);
+			setBirthday(
+				new Date(
+					moment(`${item.ThangSinh}/${item.NgaySinh}/${item.NamSinh}`, "MM-DD-YYYY").format()
+				)
+			);
+			setGender(item.GioiTinh);
+		}
+	};
 
 	const checkValidate = () => {
 		let isValid = true;
@@ -76,27 +95,25 @@ export default function ModalInsertOrUpdate(props) {
 		}
 	};
 
-	const onSubmit = () => {
+	const onSubmit = async () => {
 		if (checkValidate()) {
 			setIsLoading(true);
-			// const params = {
-			// 	username: username,
-			// 	password: password,
-			// 	appCode: AppCode,
-			// };
-			// let res = await UserApi.LogIn(params);
-			// if (checkApi.check(res, true)) {
-			// 	await logIn(res.Item.Token);
-			// 	if (isSavePassword) {
-			// 		const saveUser = {
-			// 			username: username,
-			// 			password: password,
-			// 		};
-			// 		await setSaveUser(saveUser);
-			// 	} else {
-			// 		await deleteSaveUser();
-			// 	}
-			// }
+			const splitBirthday = moment(birthday).format("L").split("/");
+			const item = {
+				...(editId && { Id: editId }),
+				HoTen: name,
+				ThangSinh: splitBirthday[0],
+				NgaySinh: splitBirthday[1],
+				NamSinh: splitBirthday[2],
+				GioiTinh: gender,
+			};
+
+			let res = editId
+				? await HocSinhApi.Update(item)
+				: await HocSinhApi.Insert(item);
+			if (checkApi.check(res)) {
+				console.log(111, { res });
+			}
 			setIsLoading(false);
 		}
 	};
@@ -105,7 +122,8 @@ export default function ModalInsertOrUpdate(props) {
 		<>
 			<CustomModal
 				isShowModal={isShowModal}
-				title="Thêm học sinh"
+				isUpdateBtn={editId ? true : false}
+				title={editId ? "Sửa học sinh" : "Thêm học sinh"}
 				isLoading={isLoading}
 				onClose={onClose}
 				onSubmit={onSubmit}
@@ -122,11 +140,12 @@ export default function ModalInsertOrUpdate(props) {
 						onPress={() => {
 							setIsShowDateTimePicker(true);
 						}}
+						activeOpacity={1}
 					>
 						<CustomInputGroup
+							type="date"
 							iconComponent={<SVGBirthday color={PALETTE.main} />}
 							title="Ngày sinh"
-							editable={false}
 							value={birthday ? moment(birthday).format("DD/MM/YYYY") : null}
 							errorValue={validate.errorBirthday}
 						/>

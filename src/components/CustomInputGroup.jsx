@@ -14,7 +14,6 @@ export default function CustomInputGroup(props) {
 		refInput = null,
 		refNextInput = null,
 		multiline = false,
-		editable = true,
 		setIsHideValue = () => {},
 		handleValue = () => {},
 		onSubmit = () => {},
@@ -29,21 +28,7 @@ export default function CustomInputGroup(props) {
 		<View style={{ flexDirection: "row" }}>
 			<View style={{ marginTop: 13 }}>{iconComponent}</View>
 			<View style={{ flex: 1, marginLeft: 19 }}>
-				{type === "text" ? (
-					<CustomInput
-						value={value}
-						isHide={isHide}
-						title={title}
-						errorValue={errorValue}
-						refInput={refInput}
-						refNextInput={refNextInput}
-						multiline={multiline}
-						editable={editable}
-						setIsHideValue={setIsHideValue}
-						handleValue={handleValue}
-						onSubmit={onSubmit}
-					/>
-				) : type === "dropdown" ? (
+				{type === "dropdown" ? (
 					<CustomDropdown
 						title={title}
 						selectedValue={selectedValue}
@@ -51,7 +36,22 @@ export default function CustomInputGroup(props) {
 						setSelectedValue={setSelectedValue}
 						errorValue={errorValue}
 					/>
-				) : null}
+				) : (
+					<CustomInput
+						type={type}
+						value={value}
+						isHide={isHide}
+						title={title}
+						errorValue={errorValue}
+						refInput={refInput}
+						refNextInput={refNextInput}
+						multiline={multiline}
+						editable={type === "date" ? false : true}
+						setIsHideValue={setIsHideValue}
+						handleValue={handleValue}
+						onSubmit={onSubmit}
+					/>
+				)}
 			</View>
 		</View>
 	);

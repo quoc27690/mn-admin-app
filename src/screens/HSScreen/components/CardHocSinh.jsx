@@ -1,80 +1,166 @@
-import { PALETTE, OPTION_STACK } from "@common/style";
-import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Nothing } from "@common/const";
+import { OPTION_STACK, PALETTE } from "@common/style";
 import SVGFemale from "@components/SVG/SVGFemale";
 import SVGMale from "@components/SVG/SVGMale";
+import React, { useRef } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Swipeable from "react-native-gesture-handler/Swipeable";
 
-const CardHocSinh = ({ navigation, data, index, namHoc, lopHoc }) => {
+const SwipeBtn = (props) => {
+	const {
+		title = null,
+		color = PALETTE.main,
+		item = null,
+		swipeableRef = null,
+		index = null,
+		onPress = () => {},
+	} = props;
+
 	return (
 		<TouchableOpacity
-			activeOpacity={1}
 			onPress={() => {
-				navigation.navigate("ThongTinHocSinh", {
-					data: { ...data, namHoc, lopHoc },
+				(async () => onPress(item.Id))().then((res) => {
+					if (res) {
+						swipeableRef.current.close();
+					}
 				});
 			}}
+			style={{
+				marginTop: index > 0 ? OPTION_STACK.spacingLine : 0,
+				backgroundColor: color,
+				width: 50,
+				alignItems: "center",
+				justifyContent: "center",
+			}}
 		>
-			<View
+			<Text
 				style={{
-					...styles.flatView,
-					marginTop: index !== 0 ? OPTION_STACK.spacingLine : 0,
+					color: PALETTE.white,
 				}}
 			>
-				<View style={styles.headerContainer}>
-					<View style={styles.headerLeft}>
-						<Image source={require("@images/user.png")} style={styles.avatar} />
-						<View style={styles.name}>
-							<Text style={styles.nameText}>{data?.HoTen}</Text>
-							<View style={styles.hssk}>
-								{data?.LstHSSK_GhiNhan.length > 0 ? (
-									<>
-										<Text style={styles.hsskText}>
-											{data.LstHSSK_GhiNhan[0].ChieuCao} cm
-										</Text>
-										<Text style={styles.hsskText}>
-											{data.LstHSSK_GhiNhan[0].CanNang} kg
-										</Text>
-									</>
-								) : (
-									<Text style={styles.hsskTextNothing}>{Nothing}</Text>
-								)}
+				{title}
+			</Text>
+		</TouchableOpacity>
+	);
+};
+
+const CardHocSinh = (props) => {
+	const swipeableRef = useRef(null);
+	const {
+		navigation,
+		item = null,
+		index = null,
+		onOpenModal = () => {},
+		onDelete = () => {},
+	} = props;
+
+	return (
+		<Swipeable
+			ref={swipeableRef}
+			renderRightActions={() => (
+				<>
+					<SwipeBtn
+						swipeableRef={swipeableRef}
+						title="Xóa"
+						color={PALETTE.red.RED}
+						item={item}
+						onPress={onDelete}
+						index={index}
+					/>
+					<SwipeBtn
+						title="Sửa"
+						item={item}
+						onPress={onOpenModal}
+						index={index}
+					/>
+				</>
+			)}
+		>
+			<TouchableOpacity
+				onPress={() => console.log(111)}
+				// activeOpacity={1}
+				// onPress={() => {
+				// 	navigation.navigate("ThongTinHocSinh", {
+				// 		item: { ...item, namHoc, lopHoc },
+				// 	});
+				// }}
+			>
+				<View
+					style={{
+						paddingVertical: OPTION_STACK.spacingHorizontal,
+						paddingHorizontal: OPTION_STACK.spacingHorizontal,
+						backgroundColor: PALETTE.white,
+						marginTop: index > 0 ? OPTION_STACK.spacingLine : 0,
+					}}
+				>
+					<View
+						style={{ flexDirection: "row", justifyContent: "space-between" }}
+					>
+						<View style={{ flexDirection: "row" }}>
+							<Image
+								source={require("@images/user.png")}
+								style={{ width: 48, height: 48, borderRadius: 25 }}
+							/>
+							<View style={{ marginLeft: 8, justifyContent: "space-between" }}>
+								<Text
+									style={{
+										fontFamily: "BeVietnamPro-600",
+										fontSize: 14,
+										textTransform: "capitalize",
+									}}
+								>
+									{item?.HoTen}
+								</Text>
+								<View style={{ flexDirection: "row" }}>
+									{item?.LstHSSK_GhiNhan.length > 0 ? (
+										<>
+											<Text style={styles.hsskText}>
+												{item.LstHSSK_GhiNhan[0].ChieuCao} cm
+											</Text>
+											<Text style={styles.hsskText}>
+												{item.LstHSSK_GhiNhan[0].CanNang} kg
+											</Text>
+										</>
+									) : (
+										<Text style={styles.hsskTextNothing}>{Nothing}</Text>
+									)}
+								</View>
 							</View>
 						</View>
-					</View>
-					{data?.GioiTinh == 0 ? (
-						<SVGMale width={24} height={24} />
-					) : (
-						<SVGFemale width={24} height={24} />
-					)}
-				</View>
-
-				<View style={styles.row}>
-					<Text style={styles.text_title}>Ngày sinh</Text>
-					<Text style={styles.text}>
-						{data.NgaySinh}/{data.ThangSinh}/{data.NamSinh}
-					</Text>
-				</View>
-				<View style={styles.row}>
-					<Text style={styles.text_title}>Phụ huynh</Text>
-					<View>
-						{data?.LstPHHS?.length > 0 ? (
-							data.LstPHHS.map((mItem, index) => {
-								return (
-									<Text key={index} style={styles.text}>
-										{mItem.FullName}
-									</Text>
-								);
-							})
+						{item?.GioiTinh == 0 ? (
+							<SVGMale width={24} height={24} />
 						) : (
-							<Text key={index} style={styles.text}>
-								{Nothing}
-							</Text>
+							<SVGFemale width={24} height={24} />
 						)}
 					</View>
+
+					<View style={styles.row}>
+						<Text style={styles.text_title}>Ngày sinh</Text>
+						<Text style={styles.text}>
+							{item?.NgaySinh}/{item?.ThangSinh}/{item?.NamSinh}
+						</Text>
+					</View>
+					<View style={styles.row}>
+						<Text style={styles.text_title}>Phụ huynh</Text>
+						<View>
+							{item?.LstPHHS?.length > 0 ? (
+								item.LstPHHS.map((mItem, index) => {
+									return (
+										<Text key={index} style={styles.text}>
+											{mItem.FullName}
+										</Text>
+									);
+								})
+							) : (
+								<Text key={index} style={styles.text}>
+									{Nothing}
+								</Text>
+							)}
+						</View>
+					</View>
 				</View>
-			</View>
-		</TouchableOpacity>
+			</TouchableOpacity>
+		</Swipeable>
 	);
 };
 
@@ -92,35 +178,6 @@ const stylesCommon = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-	flatView: {
-		paddingVertical: 15,
-		paddingHorizontal: OPTION_STACK.spacingHorizontal,
-		backgroundColor: PALETTE.white,
-	},
-	headerContainer: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-	},
-	headerLeft: {
-		flexDirection: "row",
-	},
-	avatar: {
-		width: 48,
-		height: 48,
-		borderRadius: 25,
-	},
-	name: {
-		marginLeft: 8,
-		justifyContent: "space-between",
-	},
-	nameText: {
-		fontFamily: "BeVietnamPro-600",
-		fontSize: 14,
-		textTransform: "capitalize",
-	},
-	hssk: {
-		flexDirection: "row",
-	},
 	hsskText: {
 		...stylesCommon.text_bg,
 		backgroundColor: PALETTE.whiteFull.HONEYDEW,

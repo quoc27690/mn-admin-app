@@ -7,7 +7,8 @@ import { SVGClose } from "./SVG";
 export default function CustomModal(props) {
 	const {
 		isShowModal = false,
-		isAddBtn = true,
+		isHasBtn = true,
+		isUpdateBtn = false,
 		title = null,
 		isLoading = false,
 		onClose = () => {},
@@ -80,10 +81,10 @@ export default function CustomModal(props) {
 							</Text>
 						</View>
 						{props.children}
-						{isAddBtn && (
+						{isHasBtn && (
 							<View style={{ marginTop: OPTION_STACK.spacingHorizontal }}>
 								<CustomButton
-									title="Thêm"
+									title={isUpdateBtn ? "Cập nhật" : "Thêm"}
 									onPress={onSubmit}
 									isLoading={isLoading}
 								/>
@@ -91,7 +92,7 @@ export default function CustomModal(props) {
 						)}
 						<View
 							style={{
-								marginTop: isAddBtn ? 16 : OPTION_STACK.spacingHorizontal,
+								marginTop: isHasBtn ? 16 : OPTION_STACK.spacingHorizontal,
 							}}
 						>
 							<CustomButton

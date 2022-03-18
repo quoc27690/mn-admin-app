@@ -8,6 +8,26 @@ const HocSinhApi = {
 		let resp = await Fetch.GET(`${ControllerName}`);
 		return resp;
 	},
+	GetById: async id => {
+    let resp = await Fetch.GET(`${ControllerName}/${id}`);
+    return resp;
+  },
+	Insert: async item => {
+    let resp = await Fetch.POST(`${ControllerName}`, item);
+    return resp;
+  },
+	Update: async item => {
+    let resp = await Fetch.PUT(`${ControllerName}`, item);
+    return resp;
+  },
+  Delete: async item => {
+    let resp = await Fetch.DELETE_ARRAY(`${ControllerName}/Delete`, item);
+    return resp;
+  },
+	DeletePermanently: async arrId => {
+    let resp = await Fetch.DELETE_ARRAY(`${ControllerName}/XoaVinhVien`, arrId);
+    return resp;
+  },
 };
 
 export default HocSinhApi;
