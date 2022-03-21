@@ -1,10 +1,12 @@
-import { PALETTE } from "@common/style";
+import { OPTION_STACK, PALETTE } from "@common/style";
 import { Picker } from "@react-native-picker/picker";
 import React from "react";
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
 
 export default function CustomDropdown(props) {
 	const {
+		style = null,
+		isInputGroup = true,
 		title = null,
 		selectedValue = null,
 		errorValue = null,
@@ -14,12 +16,17 @@ export default function CustomDropdown(props) {
 	return (
 		<>
 			<View
-				style={{
-					borderWidth: 1,
-					borderRadius: 4,
-					borderColor: PALETTE.gray.GAINSBORO,
-					paddingLeft: 5,
-				}}
+				style={[
+					OPTION_STACK.input,
+					{
+						paddingLeft: 8,
+						paddingRight: 0,
+						height: OPTION_STACK.heightInput,
+						flex: 1,
+						justifyContent: "center",
+					},
+					style,
+				]}
 			>
 				<Picker
 					selectedValue={selectedValue}
@@ -32,32 +39,30 @@ export default function CustomDropdown(props) {
 						value={null}
 						// enabled={false}
 						color={PALETTE.gray.DIMGRAY}
-						style={{
-							fontSize: 12,
-						}}
+						style={OPTION_STACK.inputText}
 					/>
 					{options.map((x, i) => (
 						<Picker.Item
 							label={x.label}
 							value={x.value}
 							key={i}
-							style={{
-								fontSize: 12,
-							}}
+							style={OPTION_STACK.inputText}
 						/>
 					))}
 				</Picker>
 			</View>
-			<Text
-				style={{
-					color: PALETTE.red.RED,
-					fontSize: 12,
-					marginLeft: 5,
-					marginTop: 5,
-				}}
-			>
-				{errorValue}
-			</Text>
+			{isInputGroup && (
+				<Text
+					style={{
+						color: PALETTE.red.RED,
+						fontSize: 12,
+						marginLeft: 5,
+						marginTop: 5,
+					}}
+				>
+					{errorValue}
+				</Text>
+			)}
 		</>
 	);
 }

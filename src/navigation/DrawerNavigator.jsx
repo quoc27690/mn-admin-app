@@ -22,6 +22,7 @@ const DrawerNavigator = () => {
 				name="HSScreen"
 				component={HSScreen}
 				options={{
+					title: 'Quản lý học sinh',
 					headerBackground: () => <ImageBgHeader />,
 				}}
 			/>
@@ -29,6 +30,7 @@ const DrawerNavigator = () => {
 				name="PHHSScreen"
 				component={PHHSScreen}
 				options={{
+					title: 'Quản lý PHHS',
 					headerBackground: () => <ImageBgHeader />,
 				}}
 			/>

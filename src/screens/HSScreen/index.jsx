@@ -1,70 +1,168 @@
-import { HocSinhApi, LopHocApi } from "@api/system";
+import { HocSinhApi, LopHocApi, NhatKyHoatDongApi } from "@api/system";
 import checkApi from "@common/checkApi";
-import { Nothing } from "@common/const";
+import { removeVN } from "@common/function";
 import { OPTION_STACK, PALETTE } from "@common/style";
+import CustomDropdown from "@components/CustomDropdown";
+import CustomSearchInput from "@components/CustomSearchInput";
+import EmptyData from "@components/EmptyData";
+import Loading from "@components/Loading";
+import { SVGEmptyKid } from "@components/SVG/Empty";
 import { Entypo } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
-import React, { useEffect, useState } from "react";
-import { SectionList, Text, TouchableOpacity, View, Alert } from "react-native";
-import { SearchBar } from "react-native-elements";
+import React, { createRef, useEffect, useState } from "react";
+import { Alert, SectionList, Text, TouchableOpacity, View } from "react-native";
 import CardHocSinh from "./components/CardHocSinh";
 import ModalInsertOrUpdate from "./components/ModalInsertOrUpdate";
 
 function HSScreen({ navigation, route }) {
-	const [listHSAll, setListHSAll] = useState([]);
-	const [listHS, setListHS] = useState([]);
-	const [listLopHoc, setListLopHoc] = useState([]);
+	const [listHS, setListHS] = useState({ list: [], listAll: [] });
+	const [listLopHoc, setListLopHoc] = useState({ list: [], listAll: [] });
+	const [listNamHoc, setListNamHoc] = useState([]);
 	const [sectionList, setSectionList] = useState([]);
 	const [selectedNamHoc, setSelectedNamHoc] = useState(null);
+	const [selectedLopHoc, setSelectedLopHoc] = useState(null);
 	const [searchValue, setSearchValue] = useState(null);
 	const [editId, setEditId] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isShowModal, setIsShowModal] = useState(false);
 
-	// console.log({ listHS, listLopHoc });
+	const [elRefs, setElRefs] = useState([]);
+	const [prevOpenedRow, setPrevOpenedRow] = useState(null);
 
 	useEffect(() => {
 		(async () => {
+			setIsLoading(true);
 			await Promise.all([fetchlistHocSinh(), fetchlistLopHoc()]);
+			setIsLoading(false);
 		})();
+		console.log(1)
+		return () => {
+			console.log(222);
+		}
 	}, []);
 
 	useEffect(() => {
-		if (listHS.length > 0) {
-			updateSectionList();
-		}
+		updateSectionList();
 	}, [listHS]);
+
+	// How can I use multiple refs for an array of elements with hooks?
+	useEffect(() => {
+		// add or remove refs
+		setElRefs((elRefs) => {
+			let countLength = 0;
+			sectionList.forEach((x) => {
+				countLength += x.data.length;
+			});
+			return Array(countLength)
+				.fill()
+				.map((_, i) => elRefs[i] || createRef());
+		});
+	}, [sectionList]);
+
+	useEffect(() => {
+		if (selectedNamHoc) {
+			updateListLopHoc();
+		}
+	}, [selectedNamHoc]);
+
+	useEffect(() => {
+		if (selectedNamHoc && selectedLopHoc) {
+			fetchListByFilter();
+		}
+	}, [selectedLopHoc]);
+
+	useEffect(() => {
+		search();
+	}, [searchValue]);
 
 	const fetchlistHocSinh = async () => {
 		let resp = await HocSinhApi.GetAll();
 		if (checkApi.check(resp, false)) {
 			if (resp.Item.length > 0) {
-				setListHSAll(resp.Item);
-				setListHS(resp.Item);
+				setListHS({
+					list: resp.Item,
+					listAll: resp.Item,
+				});
 			}
 		}
 	};
+
 	const fetchlistLopHoc = async () => {
 		let resp = await LopHocApi.GetAll();
 		if (checkApi.check(resp, false)) {
-			if (resp.Item.length > 0) {
-				resp.Item.forEach((e) => {
-					e.value = e.Id;
-					e.label = e.TenLop;
+			let nListLopHoc = [];
+			let nListNamHoc = [];
+
+			resp.Item.forEach((e) => {
+				nListLopHoc.push({
+					value: e.Id,
+					label: e.TenLop,
+					namHoc: e.NamHoc,
 				});
-				setListLopHoc(resp.Item);
+			});
+			// Lọc trùng
+			resp.Item = resp.Item.filter(
+				(thing, index, self) =>
+					index === self.findIndex((t) => t.NamHoc === thing.NamHoc)
+			);
+			// Tạo mảng mới có value và label
+			resp.Item.forEach((e) => {
+				nListNamHoc.push({
+					value: e.NamHoc,
+					label: `${e.NamHoc}`,
+				});
+			});
+
+			setListNamHoc(nListNamHoc);
+			setListLopHoc({
+				list: nListLopHoc,
+				listAll: nListLopHoc,
+			});
+		}
+	};
+
+	const fetchListByFilter = async () => {
+		setIsLoading(true);
+		let resp = await NhatKyHoatDongApi.GetListHS(
+			selectedNamHoc,
+			selectedLopHoc
+		);
+		if (checkApi.check(resp, false)) {
+			const nListHS = resp.Item.DsLopHoc_HS;
+			setListHS({
+				list: nListHS,
+				listAll: nListHS,
+			});
+		}
+		setIsLoading(false);
+	};
+
+	const search = () => {
+		if (Array.isArray(listHS.listAll) == false || listHS.listAll.length == 0) {
+			return;
+		} else {
+			let filterValuesClone = searchValue;
+			let listRowsClone = listHS.listAll.filter((x) => {
+				return (
+					(filterValuesClone = (filterValuesClone || "").toLowerCase().trim()),
+					removeVN(x.HoTen).toLowerCase().includes(removeVN(filterValuesClone))
+				);
+			});
+
+			if (!searchValue) {
+				setListHS({ list: listHS.listAll, listAll: listHS.listAll });
+			} else {
+				setListHS({ list: listRowsClone, listAll: listHS.listAll });
 			}
 		}
 	};
 
-	const onSearch = () => {};
-
 	const updateSectionList = () => {
 		//Lọc dữ liệu -> tách thành group theo chữ cái đầu tiên của tên học sinh -> dùng cho sectionList
+
 		//Lấy danh sách chữ cái đầu của tên tất cả học sinh
 		let listHeader = [];
-		listHS?.length > 0 &&
-			listHS.forEach((x) => {
+		listHS.list.length > 0 &&
+			listHS.list.forEach((x) => {
 				let firstCharacter = "";
 				let arr = x.HoTen.split(" ");
 				firstCharacter = arr[arr.length - 1].charAt(0).toUpperCase();
@@ -87,12 +185,12 @@ function HSScreen({ navigation, route }) {
 		let listData = [];
 		listHeader.forEach((x, i) => {
 			listData.push({ title: x, data: [] });
-			listHS.forEach((y) => {
+			listHS.list.forEach((y, ii) => {
 				let firstCharacter = "";
 				let arr = y.HoTen.split(" ");
 				firstCharacter = arr[arr.length - 1].charAt(0).toUpperCase();
 				if (x === firstCharacter) {
-					listData[i].data.push(y);
+					listData[i].data.push({ ...y, indexSwipeable: ii });
 				}
 			});
 		});
@@ -113,6 +211,12 @@ function HSScreen({ navigation, route }) {
 		setSectionList(listData);
 	};
 
+	const updateListLopHoc = () => {
+		let listLopHocClone = [...listLopHoc.listAll];
+		listLopHocClone = listLopHocClone.filter((x) => x.namHoc == selectedNamHoc);
+		setListLopHoc({ list: listLopHocClone, listAll: listLopHoc.listAll });
+	};
+
 	const onOpenModal = (id) => {
 		if (id) {
 			setEditId(id);
@@ -127,39 +231,33 @@ function HSScreen({ navigation, route }) {
 		setIsShowModal(false);
 	};
 
-	const onDelete = async (id) => {
-		const reuslt = await AsyncAlert(id);
-		return reuslt;
+	const onDelete = (id) => {
+		Alert.alert("Bạn có muốn xóa học sinh này", "", [
+			{
+				text: "Hủy",
+				onPress: () => console.log("Cancel Pressed"),
+			},
+			{
+				text: "Đồng ý",
+				onPress: async () => {
+					let resp = await HocSinhApi.Delete([id]);
+					if (checkApi.check(resp)) {
+						prevOpenedRow?.current?.close();
+						let listHSClone = JSON.parse(JSON.stringify(listHS));
+						listHSClone.list = listHSClone.list.filter((x) => x.Id !== id);
+						setListHS(listHSClone);
+					}
+				},
+			},
+		]);
 	};
 
-	const AsyncAlert = async (id) =>
-		new Promise((resolve) => {
-			Alert.alert(
-				"Bạn có muốn xóa học sinh này",
-				"",
-				[
-					{
-						text: "Hủy",
-						onPress: () => console.log("Cancel Pressed"),
-					},
-					{
-						text: "ok",
-						onPress: async () => {
-							setIsLoading(true);
-							let resp = await HocSinhApi.Delete([id]);
-							if (checkApi.check(resp)) {
-								let listHSClone = JSON.parse(JSON.stringify(listHS));
-								listHSClone = listHSClone.filter((x) => x.Id !== id);
-								setListHS(listHSClone);
-								resolve(true);
-							}
-							setIsLoading(false);
-						},
-					},
-				],
-				{ cancelable: false }
-			);
-		});
+	const onSwipeableClose = (indexSwipeable) => {
+		if (prevOpenedRow && prevOpenedRow !== elRefs[indexSwipeable]) {
+			prevOpenedRow?.current?.close();
+		}
+		setPrevOpenedRow(elRefs[indexSwipeable]);
+	};
 
 	return (
 		<View
@@ -169,119 +267,115 @@ function HSScreen({ navigation, route }) {
 			}}
 		>
 			<View
-				style={{
-					padding: OPTION_STACK.spacingHorizontal,
-					backgroundColor: PALETTE.white,
-				}}
+				style={{ overflow: "hidden", paddingBottom: OPTION_STACK.spacingLine }}
 			>
 				<View
 					style={{
-						display: "flex",
-						flexDirection: "row",
+						padding: OPTION_STACK.spacingHorizontal,
+						backgroundColor: PALETTE.white,
+						shadowColor: PALETTE.gray.GAINSBORO,
+						shadowOffset: { width: 1, height: 1 },
+						shadowOpacity: 0.1,
+						shadowRadius: 3,
+						elevation: OPTION_STACK.spacingLine,
 					}}
 				>
-					<Picker
-						selectedValue={selectedNamHoc}
-						onValueChange={(itemValue, itemIndex) =>
-							setSelectedNamHoc(itemValue)
-						}
-						style={{ width: "50%" }}
+					<View
+						style={{
+							display: "flex",
+							flexDirection: "row",
+						}}
 					>
-						<Picker.Item
-							label="Chọn năm học"
-							value="0"
-							enabled={false}
-							color={PALETTE.gray.DIMGRAY}
+						<CustomDropdown
+							style={{ marginRight: OPTION_STACK.spacingLine }}
+							isInputGroup={false}
+							title="Chọn năm học"
+							selectedValue={selectedNamHoc}
+							options={listNamHoc}
+							setSelectedValue={setSelectedNamHoc}
 						/>
-						<Picker.Item label="Java" value="java" />
-						<Picker.Item label="JavaScript" value="js" />
-					</Picker>
-					<Picker
-						selectedValue={selectedNamHoc}
-						onValueChange={(itemValue, itemIndex) =>
-							setSelectedNamHoc(itemValue)
-						}
-						style={{ width: "50%" }}
-					>
-						<Picker.Item
-							label="Chọn lớp học"
-							value="0"
-							enabled={false}
-							color={PALETTE.gray.DIMGRAY}
+						<CustomDropdown
+							style={{ marginLeft: OPTION_STACK.spacingLine }}
+							isInputGroup={false}
+							title="Chọn lớp học"
+							selectedValue={selectedLopHoc}
+							options={listLopHoc.list}
+							setSelectedValue={setSelectedLopHoc}
 						/>
-						<Picker.Item label="Java" value="java" />
-						<Picker.Item label="JavaScript" value="js" />
-					</Picker>
+					</View>
+					<CustomSearchInput
+						title="Tìm học sinh"
+						searchValue={searchValue}
+						onSearch={setSearchValue}
+						style={{ marginTop: 10 }}
+					/>
 				</View>
-				<SearchBar
-					placeholder="Tìm học sinh"
-					onChangeText={(value) => onSearch(value)}
-					value={searchValue}
-					containerStyle={{
-						backgroundColor: PALETTE.white,
-						padding: 0,
-						borderTopWidth: 0,
-						borderBottomWidth: 0,
-					}}
-					inputContainerStyle={{
-						backgroundColor: PALETTE.whiteFull.GHOSTWHITE,
-						borderRadius: 8,
-					}}
-					inputStyle={{ fontFamily: "BeVietnamPro-400", fontSize: 14 }}
-				/>
 			</View>
 
-			{sectionList?.length > 0 ? (
-				<SectionList
-					sections={sectionList}
-					keyExtractor={(item, index) => item + index}
-					renderItem={({ item, index }) => (
-						<CardHocSinh
-							item={item}
-							index={index}
-							navigation={navigation}
-							onOpenModal={onOpenModal}
-							onDelete={onDelete}
+			{isLoading ? (
+				<Loading style={{ backgroundColor: PALETTE.white, flex: 1 }} />
+			) : (
+				<>
+					{sectionList?.length > 0 ? (
+						<SectionList
+							sections={sectionList}
+							keyExtractor={(item, index) => item + index}
+							renderItem={({ item, index }) => (
+								<CardHocSinh
+									item={item}
+									index={index}
+									navigation={navigation}
+									onOpenModal={onOpenModal}
+									onDelete={onDelete}
+									onSwipeableClose={onSwipeableClose}
+									refSwipeable={elRefs[item.indexSwipeable]}
+								/>
+							)}
+							renderSectionHeader={({ section: { title } }) => (
+								<View
+									style={{
+										paddingHorizontal: OPTION_STACK.spacingHorizontal,
+										height: 48,
+										justifyContent: "center",
+									}}
+								>
+									<Text
+										style={{ fontFamily: "BeVietnamPro-700", fontSize: 14 }}
+									>
+										{title}
+									</Text>
+								</View>
+							)}
+						/>
+					) : (
+						<EmptyData
+							icon={<SVGEmptyKid width={150} height={150} />}
+							title="Không có trẻ nào"
 						/>
 					)}
-					renderSectionHeader={({ section: { title } }) => (
-						<View
-							style={{
-								paddingHorizontal: OPTION_STACK.spacingHorizontal,
-								height: 48,
-								justifyContent: "center",
-							}}
-						>
-							<Text style={{ fontFamily: "BeVietnamPro-700", fontSize: 14 }}>
-								{title}
-							</Text>
-						</View>
-					)}
-				/>
-			) : (
-				<Text>{Nothing}</Text>
+					<TouchableOpacity
+						style={{
+							backgroundColor: PALETTE.main,
+							width: 48,
+							height: 48,
+							borderRadius: 24,
+							alignItems: "center",
+							justifyContent: "center",
+							position: "absolute",
+							right: OPTION_STACK.spacingHorizontal,
+							bottom: OPTION_STACK.spacingHorizontal,
+						}}
+						onPress={() => onOpenModal(null)}
+					>
+						<Entypo name="plus" size={24} color={PALETTE.white} />
+					</TouchableOpacity>
+					<ModalInsertOrUpdate
+						isShowModal={isShowModal}
+						editId={editId}
+						onClose={onCloseModal}
+					/>
+				</>
 			)}
-			<TouchableOpacity
-				style={{
-					backgroundColor: PALETTE.main,
-					width: 48,
-					height: 48,
-					borderRadius: 24,
-					alignItems: "center",
-					justifyContent: "center",
-					position: "absolute",
-					right: OPTION_STACK.spacingHorizontal,
-					bottom: OPTION_STACK.spacingHorizontal,
-				}}
-				onPress={() => onOpenModal(null)}
-			>
-				<Entypo name="plus" size={24} color={PALETTE.white} />
-			</TouchableOpacity>
-			<ModalInsertOrUpdate
-				isShowModal={isShowModal}
-				editId={editId}
-				onClose={onCloseModal}
-			/>
 		</View>
 	);
 }

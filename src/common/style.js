@@ -35,6 +35,19 @@ const PALETTE = {
 const OPTION_STACK = {
 	spacingHorizontal: 22.5,
 	spacingLine: 5,
+	heightInput: 47,
+	heightTexarea: 104,
+	input: {
+		borderWidth: 1,
+		borderRadius: 4,
+		paddingLeft: 16,
+		paddingRight: 16,
+		borderColor: PALETTE.gray.GAINSBORO,
+	},
+	inputText: {
+		fontFamily: "BeVietnamPro-400",
+		fontSize: 12,
+	},
 };
 
 export { OPTION_STACK, STATUSBAR_HEIGHT, PALETTE };

@@ -14,7 +14,10 @@ export default function CustomButton(props) {
 		<Button
 			title={title}
 			onPress={onPress}
-			isLoading={isLoading}
+			loading={isLoading}
+			loadingProps={{
+				color: isCloseBtn ? PALETTE.main : PALETTE.white,
+			}}
 			buttonStyle={[
 				{ height: 50, borderRadius: 5, backgroundColor: PALETTE.main },
 				isCloseBtn && {

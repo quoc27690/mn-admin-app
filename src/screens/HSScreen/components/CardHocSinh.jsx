@@ -2,7 +2,7 @@ import { Nothing } from "@common/const";
 import { OPTION_STACK, PALETTE } from "@common/style";
 import SVGFemale from "@components/SVG/SVGFemale";
 import SVGMale from "@components/SVG/SVGMale";
-import React, { useRef } from "react";
+import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 
@@ -11,20 +11,13 @@ const SwipeBtn = (props) => {
 		title = null,
 		color = PALETTE.main,
 		item = null,
-		swipeableRef = null,
 		index = null,
 		onPress = () => {},
 	} = props;
 
 	return (
 		<TouchableOpacity
-			onPress={() => {
-				(async () => onPress(item.Id))().then((res) => {
-					if (res) {
-						swipeableRef.current.close();
-					}
-				});
-			}}
+			onPress={() => onPress(item.Id)}
 			style={{
 				marginTop: index > 0 ? OPTION_STACK.spacingLine : 0,
 				backgroundColor: color,
@@ -45,22 +38,23 @@ const SwipeBtn = (props) => {
 };
 
 const CardHocSinh = (props) => {
-	const swipeableRef = useRef(null);
 	const {
 		navigation,
 		item = null,
 		index = null,
+		refSwipeable = null,
 		onOpenModal = () => {},
 		onDelete = () => {},
+		onSwipeableClose = () => {},
 	} = props;
 
 	return (
 		<Swipeable
-			ref={swipeableRef}
+			ref={refSwipeable}
+			onSwipeableWillOpen={() => onSwipeableClose(item.indexSwipeable)}
 			renderRightActions={() => (
 				<>
 					<SwipeBtn
-						swipeableRef={swipeableRef}
 						title="Xóa"
 						color={PALETTE.red.RED}
 						item={item}
@@ -112,7 +106,7 @@ const CardHocSinh = (props) => {
 									{item?.HoTen}
 								</Text>
 								<View style={{ flexDirection: "row" }}>
-									{item?.LstHSSK_GhiNhan.length > 0 ? (
+									{item?.LstHSSK_GhiNhan?.length > 0 ? (
 										<>
 											<Text style={styles.hsskText}>
 												{item.LstHSSK_GhiNhan[0].ChieuCao} cm

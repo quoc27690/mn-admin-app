@@ -1,4 +1,4 @@
-import { PALETTE } from "@common/style";
+import { OPTION_STACK, PALETTE } from "@common/style";
 import React from "react";
 import { Input } from "react-native-elements";
 import { SVGHidePassword, SVGShowPassword } from "./SVG";
@@ -62,17 +62,13 @@ export default function CustomInput(props) {
 			containerStyle={{
 				paddingHorizontal: 0,
 			}}
-			inputContainerStyle={{
-				borderRadius: 4,
-				borderColor: PALETTE.gray.GAINSBORO,
-				borderWidth: 1,
-				paddingLeft: 16,
-				paddingRight: 16,
-			}}
+			inputContainerStyle={OPTION_STACK.input}
 			inputStyle={[
 				{
-					fontSize: 12,
-					height: multiline ? 104 : 47,
+					...OPTION_STACK.inputText,
+					height: multiline
+						? OPTION_STACK.heightTexarea
+						: OPTION_STACK.heightInput,
 				},
 				multiline && {
 					textAlignVertical: "top",

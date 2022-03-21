@@ -46,7 +46,10 @@ export default function ModalInsertOrUpdate(props) {
 			setName(item.HoTen);
 			setBirthday(
 				new Date(
-					moment(`${item.ThangSinh}/${item.NgaySinh}/${item.NamSinh}`, "MM-DD-YYYY").format()
+					moment(
+						`${item.ThangSinh}/${item.NgaySinh}/${item.NamSinh}`,
+						"MM-DD-YYYY"
+					).format()
 				)
 			);
 			setGender(item.GioiTinh);
@@ -107,12 +110,11 @@ export default function ModalInsertOrUpdate(props) {
 				NamSinh: splitBirthday[2],
 				GioiTinh: gender,
 			};
-
 			let res = editId
 				? await HocSinhApi.Update(item)
 				: await HocSinhApi.Insert(item);
 			if (checkApi.check(res)) {
-				console.log(111, { res });
+				onClose();
 			}
 			setIsLoading(false);
 		}

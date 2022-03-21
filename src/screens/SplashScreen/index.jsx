@@ -1,4 +1,5 @@
 import { PALETTE } from "@common/style";
+import Loading from "@components/Loading";
 import React from "react";
 import { ImageBackground, View } from "react-native";
 import { Image } from "react-native-elements";
@@ -19,9 +20,7 @@ export default SplashScreen = (props) => {
 					marginTop: 100,
 				}}
 			/>
-			<View style={{ height: 100 }}>
-				<BarIndicator color={PALETTE.main} count={6} size={30} />
-			</View>
+			<Loading style={{ height: 100 }}/>
 		</ImageBackground>
 	);
 };
